@@ -1,19 +1,18 @@
 from transformers import Trainer, TrainingArguments
 from transformers import LlamaForSequenceClassification, LlamaTokenizer
 from huggingface_hub import login
-
-login("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")
-
-
-# Load the tokenizer and model
-model_name = "huggyllama/llama-7b" 
-tokenizer = LlamaTokenizer.from_pretrained(model_name)
-model = LlamaForSequenceClassification.from_pretrained(model_name, num_labels=3)  # 3 labels for our categories
-
 from datasets import load_dataset
 
-# Load the dataset from a CSV file
-dataset = load_dataset("csv", data_files="news_articles.csv")
+# Log into Hugging Face
+login("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")
+
+# Load the tokenizer and model
+model_name = "huggyllama/llama-7b"
+tokenizer = LlamaTokenizer.from_pretrained(model_name)
+model = LlamaForSequenceClassification.from_pretrained(model_name, num_labels=3)  # 3 labels for classification
+
+# Load the dataset from a JSON file
+dataset = load_dataset("json", data_files="sample_data.json")
 
 # Split into training and testing sets
 train_dataset = dataset["train"].train_test_split(test_size=0.2)["train"]
