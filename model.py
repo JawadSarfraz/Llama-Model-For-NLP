@@ -2,6 +2,7 @@ from transformers import Trainer, TrainingArguments
 from transformers import LlamaForSequenceClassification, LlamaTokenizer
 from huggingface_hub import login
 from datasets import load_dataset
+import pyarrow as pa
 
 # Log into Hugging Face
 login("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")
@@ -26,6 +27,7 @@ dataset = dataset.filter(lambda example: "abstract" in example and example["abst
 
 # Map labels
 label_mapping = {"330": 0, "F41": 1, "G21": 2}
+
 def add_labels(example):
     example["label"] = label_mapping.get(example["classification_ddc"][0], -1)
     return example
@@ -69,8 +71,6 @@ train_dataset = reset_schema(train_dataset, MAX_LENGTH)
 test_dataset = reset_schema(test_dataset, MAX_LENGTH)
 
 # Cast schema manually (optional)
-import pyarrow as pa
-
 def cast_dataset(dataset, max_length):
     schema = pa.schema([
         ("input_ids", pa.list_(pa.int32(), max_length)),  # Define `input_ids` with fixed length
@@ -111,9 +111,14 @@ print("Evaluation Results:", results)
 
 # Example text for prediction
 new_article = "The German banking system faces significant integration challenges."
-inputs = tokenizer(new_article, return_tensors="pt", truncation=True, padding="max_length", max_length=MAX_LENGTH)  # Match length
+
+# Tokenize the input with the same max_length
+inputs = tokenizer(new_article, return_tensors="pt", truncation=True, padding="max_length", max_length=MAX_LENGTH)
+
+# Make prediction
 outputs = model(**inputs)
 predicted_label = outputs.logits.argmax(dim=1).item()
 
+# Map label to category
 label_map = {0: "Economics", 1: "Trade", 2: "Banking/Finance"}
 print("Predicted Category:", label_map[predicted_label])

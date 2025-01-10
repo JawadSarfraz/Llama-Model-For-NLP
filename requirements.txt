@@ -1,0 +1,4 @@
+transformers
+datasets
+huggingface_hub==0.17.1
+torch==2.0.1
