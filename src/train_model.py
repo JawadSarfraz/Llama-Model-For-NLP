@@ -11,6 +11,8 @@ def load_data():
 
 # Step 3: Preprocess and split the data
 def prepare_data(df):
+    # Convert list of subjects to a single string (assuming each list has only one item)
+    df['subject'] = df['subject'].apply(lambda x: x[0] if x else None)
     
     # Assuming 'abstract' fields are lists of strings
     df['text'] = df['abstract'].apply(lambda x: ' '.join(x).lower())
