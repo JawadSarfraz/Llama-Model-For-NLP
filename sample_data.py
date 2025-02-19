@@ -11,7 +11,7 @@ objects = []
 try:
     with open(input_file_path, 'r') as file:
         for i, line in enumerate(file):
-            if i >= 2:  # Stop after reading the first 20 objects
+            if i >= 100:  # Stop after reading the first 100 objects
                 break
             try:
                 # Convert each line to a JSON object and append to the list
