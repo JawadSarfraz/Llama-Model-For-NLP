@@ -1,8 +1,8 @@
 import json
 
 # Specify the path to your large JSON file
-input_file_path = 'data.json'
-output_file_path = 'sample_data.json'
+input_file_path = 'data/data.json'
+output_file_path = 'data/sample_data.json'
 
 # List to store the first 20 JSON objects
 objects = []
@@ -11,7 +11,7 @@ objects = []
 try:
     with open(input_file_path, 'r') as file:
         for i, line in enumerate(file):
-            if i >= 2000:  # Stop after reading the first 100 objects
+            if i >= 20:  # Stop after reading the first 100 objects
                 break
             try:
                 # Convert each line to a JSON object and append to the list

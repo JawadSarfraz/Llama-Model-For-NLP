@@ -2,6 +2,8 @@ from transformers import Trainer, TrainingArguments
 from transformers import LlamaForSequenceClassification, LlamaTokenizer
 from huggingface_hub import login
 from datasets import load_dataset
+import numpy as np
+from sklearn.preprocessing import MultiLabelBinarizer
 
 # Log into Hugging Face
 login("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")
@@ -11,27 +13,33 @@ model_name = "huggyllama/llama-7b"
 tokenizer = LlamaTokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token  # Use eos_token as padding token
 
-model = LlamaForSequenceClassification.from_pretrained(
-    model_name,
-    load_in_8bit=True,
-    device_map="auto",
-    num_labels=3
-)
-
 # Load dataset and remove pyarrow schema
-dataset = load_dataset("json", data_files="sample_data.json").with_format("python")
+dataset = load_dataset("json", data_files="data/sample_data.json").with_format("python")
 
 # Filter out invalid examples
 dataset = dataset.filter(lambda example: "abstract" in example and example["abstract"] is not None)
 
-# Map labels
-label_mapping = {"330": 0, "F41": 1, "G21": 2}
-def add_labels(example):
-    example["label"] = label_mapping.get(example["classification_ddc"][0], -1)
+# Create subject vocabulary
+all_subjects = set()
+for example in dataset["train"]:
+    if "subject" in example and example["subject"]:
+        all_subjects.update(example["subject"])
+
+# Convert subjects to list and create label encoder
+subject_list = sorted(list(all_subjects))
+label_encoder = MultiLabelBinarizer()
+label_encoder.fit([subject_list])  # Fit on all possible subjects
+
+# Function to encode labels
+def encode_labels(example):
+    if "subject" in example and example["subject"]:
+        example["labels"] = label_encoder.transform([example["subject"]])[0]
+    else:
+        example["labels"] = np.zeros(len(subject_list))
     return example
 
-dataset = dataset.map(add_labels)
-dataset = dataset.filter(lambda example: example["label"] != -1)
+# Apply label encoding
+dataset = dataset.map(encode_labels)
 
 # Fixed max length
 MAX_LENGTH = 80
@@ -43,7 +51,7 @@ def tokenize_function(example):
         abstract_text,
         truncation=True,
         padding="max_length",
-        max_length=MAX_LENGTH  # Use fixed max length
+        max_length=MAX_LENGTH
     )
 
 # Tokenize and split the dataset
@@ -68,14 +76,14 @@ def reset_schema(dataset, max_length):
 train_dataset = reset_schema(train_dataset, MAX_LENGTH)
 test_dataset = reset_schema(test_dataset, MAX_LENGTH)
 
-# Cast schema manually (optional)
+# Cast schema manually
 import pyarrow as pa
 
 def cast_dataset(dataset, max_length):
     schema = pa.schema([
-        ("input_ids", pa.list_(pa.int32(), max_length)),  # Define `input_ids` with fixed length
-        ("attention_mask", pa.list_(pa.int32(), max_length)),  # Define `attention_mask` with fixed length
-        ("label", pa.int32())  # Label column
+        ("input_ids", pa.list_(pa.int32(), max_length)),
+        ("attention_mask", pa.list_(pa.int32(), max_length)),
+        ("labels", pa.list_(pa.int32(), len(subject_list)))
     ])
     return dataset.cast(schema)
 
@@ -86,6 +94,15 @@ test_dataset = cast_dataset(test_dataset, MAX_LENGTH)
 train_dataset.set_format("torch")
 test_dataset.set_format("torch")
 
+# Initialize model with number of labels equal to number of subjects
+model = LlamaForSequenceClassification.from_pretrained(
+    model_name,
+    load_in_8bit=True,
+    device_map="auto",
+    num_labels=len(subject_list),
+    problem_type="multi_label_classification"
+)
+
 # Training arguments
 training_args = TrainingArguments(
     output_dir="./results",
@@ -94,7 +111,26 @@ training_args = TrainingArguments(
     per_device_eval_batch_size=8,
     num_train_epochs=3,
     weight_decay=0.01,
+    metric_for_best_model="f1",
+    load_best_model_at_end=True,
 )
+
+# Custom compute metrics function for multi-label classification
+def compute_metrics(eval_pred):
+    predictions, labels = eval_pred
+    predictions = (predictions > 0).astype(int)
+    
+    # Calculate metrics
+    from sklearn.metrics import f1_score, precision_score, recall_score
+    f1 = f1_score(labels, predictions, average='weighted')
+    precision = precision_score(labels, predictions, average='weighted')
+    recall = recall_score(labels, predictions, average='weighted')
+    
+    return {
+        'f1': f1,
+        'precision': precision,
+        'recall': recall
+    }
 
 # Trainer setup
 trainer = Trainer(
@@ -102,6 +138,7 @@ trainer = Trainer(
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=test_dataset,
+    compute_metrics=compute_metrics,
 )
 
 # Train and evaluate
@@ -111,9 +148,10 @@ print("Evaluation Results:", results)
 
 # Example text for prediction
 new_article = "The German banking system faces significant integration challenges."
-inputs = tokenizer(new_article, return_tensors="pt", truncation=True, padding="max_length", max_length=MAX_LENGTH)  # Match length
+inputs = tokenizer(new_article, return_tensors="pt", truncation=True, padding="max_length", max_length=MAX_LENGTH)
 outputs = model(**inputs)
-predicted_label = outputs.logits.argmax(dim=1).item()
+predictions = (outputs.logits > 0).squeeze().numpy()
 
-label_map = {0: "Economics", 1: "Trade", 2: "Banking/Finance"}
-print("Predicted Category:", label_map[predicted_label])
+# Get predicted subjects
+predicted_subjects = label_encoder.inverse_transform([predictions])
+print("\nPredicted Subjects:", predicted_subjects[0])
