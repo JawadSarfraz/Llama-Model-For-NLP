@@ -1,5 +1,9 @@
 import os
-from data.data_loader import DataLoader
+import sys
+import numpy as np
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.data.data_loader import DataLoader
 
 def test_data_loader():
     # Get the absolute path to the config file
@@ -16,7 +20,10 @@ def test_data_loader():
     print("\nSample data from first example:")
     first_example = train_test_split['train'][0]
     print("Abstract:", first_example['abstract'])
-    print("Subjects:", label_encoder.inverse_transform([first_example['labels']])[0])
+    
+    # Convert labels to numpy array for inverse transform
+    labels = np.array([first_example['labels']])
+    print("Subjects:", label_encoder.inverse_transform(labels)[0])
 
 if __name__ == "__main__":
     test_data_loader() 
