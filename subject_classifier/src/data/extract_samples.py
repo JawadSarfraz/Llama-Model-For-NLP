@@ -11,6 +11,9 @@ def extract_samples(input_file: str, output_file: str, num_samples: int = 1000):
     
     # List to store the JSON objects
     objects = []
+    entries_with_subject = 0
+    entries_with_abstract = 0
+    entries_with_both = 0
     
     # Open and read the file line by line
     try:
@@ -19,10 +22,24 @@ def extract_samples(input_file: str, output_file: str, num_samples: int = 1000):
                 if i >= num_samples:  # Stop after reading the requested number of objects
                     break
                 try:
-                    # Convert each line to a JSON object and append to the list
+                    # Convert each line to a JSON object
                     entry = json.loads(line.strip())
-                    if 'abstract' in entry and 'subject' in entry and entry['abstract'] and entry['subject']:
+                    
+                    # Count statistics
+                    has_subject = 'subject' in entry and entry['subject']
+                    has_abstract = 'abstract' in entry and entry['abstract']
+                    
+                    if has_subject:
+                        entries_with_subject += 1
+                    if has_abstract:
+                        entries_with_abstract += 1
+                    if has_subject and has_abstract:
+                        entries_with_both += 1
+                    
+                    # Only check for subject field
+                    if has_subject:
                         objects.append(entry)
+                        
                 except json.JSONDecodeError as e:
                     logger.warning(f"Error decoding JSON on line {i+1}: {e}")
                     continue
@@ -33,7 +50,13 @@ def extract_samples(input_file: str, output_file: str, num_samples: int = 1000):
 
         logger.info(f"Successfully extracted {len(objects)} objects.")
         
-        # Print some statistics
+        # Print detailed statistics
+        logger.info(f"\nDetailed Statistics:")
+        logger.info(f"Entries with subject: {entries_with_subject}")
+        logger.info(f"Entries with abstract: {entries_with_abstract}")
+        logger.info(f"Entries with both: {entries_with_both}")
+        
+        # Print some statistics about subjects
         all_subjects = set()
         for entry in objects:
             all_subjects.update(entry['subject'])
