@@ -5,7 +5,7 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 ## Project Structure
 
 ```
-subject_classifier/
+.
 ├── data/              # Data files
 │   ├── raw/          # Original data files
 │   └── processed/    # Processed and tokenized data
@@ -19,10 +19,12 @@ subject_classifier/
 │   │   └── model.py
 │   └── utils/       # Utility functions
 ├── configs/          # Configuration files
-│   └── config.yaml
-├── notebooks/        # Jupyter notebooks
+│   └── config.yaml  # Model and training configurations
+├── notebooks/        # Jupyter notebooks for analysis
 ├── tests/           # Unit tests
-└── results/         # Training results
+├── results/         # Training results and model checkpoints
+├── requirements.txt # Project dependencies
+└── README.md        # Project documentation
 ```
 
 ## Features
@@ -48,8 +50,8 @@ The project uses a dataset of academic papers with:
 
 1. Create a virtual environment:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv modelenv
+source modelenv/bin/activate  # On Windows: modelenv\Scripts\activate
 ```
 
 2. Install dependencies:
