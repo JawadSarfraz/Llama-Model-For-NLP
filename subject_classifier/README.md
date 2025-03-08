@@ -9,9 +9,12 @@ subject_classifier/
 ├── data/              # Data files
 │   ├── raw/          # Original data files
 │   └── processed/    # Processed and tokenized data
+│       ├── sample_data.json       # Initial test dataset (20 samples)
+│       └── expanded_dataset.json  # Expanded dataset (~1000 samples)
 ├── src/              # Source code
 │   ├── data/        # Data loading and processing
-│   │   └── data_loader.py
+│   │   ├── data_loader.py      # Data loading and preprocessing
+│   │   └── extract_samples.py  # Dataset expansion utilities
 │   ├── models/      # Model implementation
 │   │   └── model.py
 │   └── utils/       # Utility functions
@@ -30,6 +33,16 @@ subject_classifier/
 - Configurable model parameters
 - Comprehensive logging and monitoring
 - Test suite for data loading and model verification
+- Scalable dataset extraction and processing
+
+## Dataset
+
+The project uses a dataset of academic papers with:
+- ~1000 academic paper abstracts
+- 3,891 unique subject categories
+- Multi-label classification (papers can have multiple subjects)
+- Mix of English and German content
+- Comprehensive metadata including titles, authors, and publication info
 
 ## Setup
 
@@ -50,18 +63,27 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Data Loading
+### Data Processing
 
-The project includes a robust data loader that handles:
+The project includes several data processing utilities:
+
+1. Extract samples from source data:
+```bash
+python -m src.data.extract_samples
+```
+
+2. Test the data loader:
+```bash
+python -m src.test_data_loader
+```
+
+The data processing pipeline handles:
 - JSON data loading and preprocessing
 - Multi-label encoding
 - Text tokenization
 - Train/test splitting
-
-Test the data loader:
-```bash
-python -m src.test_data_loader
-```
+- Dataset expansion and sampling
+- Data validation and filtering
 
 ### Model Implementation
 
@@ -97,6 +119,7 @@ Current implementation includes:
 - ✅ Data loading and preprocessing
 - ✅ Model architecture
 - ✅ Basic testing infrastructure
+- ✅ Dataset expansion (957 samples)
 - 🔄 Training implementation (in progress)
 
 ## License
