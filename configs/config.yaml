@@ -18,7 +18,7 @@ training:
   logging_steps: 100    # Log every 50 steps
 
 data:
-  raw_data_path: "data/raw/data.json"
+  raw_data_path: "data/data.json"
   sample_data_path: "data/processed/sample_data.json"
   splits:
     train_size: 0.7    # ~670 samples

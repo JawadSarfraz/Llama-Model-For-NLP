@@ -34,12 +34,18 @@ def test_data_splitting(data_loader):
     
     # Check that no data is lost in splitting
     total_samples = len(splits["train"]) + len(splits["validation"]) + len(splits["test"])
-    data_path = os.path.join(data_loader.project_root, data_loader.config['data']['raw_data_path'])
-    original_data = []
+    data_path = os.path.join(data_loader.project_root, data_loader.config['data']['sample_data_path'])
     with open(data_path, 'r') as f:
-        for line in f:
-            if line.strip():  # Skip empty lines
-                original_data.append(json.loads(line))
+        content = f.read()
+        try:
+            # Try loading as JSON array first
+            original_data = json.loads(content)
+        except json.JSONDecodeError:
+            # If that fails, try loading as JSONL
+            original_data = []
+            for line in content.splitlines():
+                if line.strip():
+                    original_data.append(json.loads(line))
     assert total_samples == len(original_data)  # Check no data was lost
     
     # Check that splits are approximately correct size

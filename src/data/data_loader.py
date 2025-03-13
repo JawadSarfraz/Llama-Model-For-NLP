@@ -10,6 +10,7 @@ class DataLoader:
     def __init__(self, config_path):
         """Initialize the data loader with configuration"""
         print("Initializing DataLoader...")
+        self.config_path = config_path
         with open(config_path, 'r') as f:
             self.config = yaml.safe_load(f)
         
@@ -23,13 +24,22 @@ class DataLoader:
         
     def load_and_process_data(self):
         """Load and process the dataset"""
-        # Get absolute path to sample data
-        sample_data_path = os.path.join(self.project_root, self.config['data']['sample_data_path'])
-        print(f"\nLoading dataset from {sample_data_path}")
+        # Get absolute path to data
+        data_path = os.path.join(self.project_root, self.config['data']['sample_data_path'])
+        print(f"\nLoading dataset from {data_path}")
         
-        # Load dataset directly using json
-        with open(sample_data_path, 'r') as f:
-            data = json.load(f)
+        # Load dataset
+        with open(data_path, 'r') as f:
+            content = f.read()
+            try:
+                # Try loading as JSON array first
+                data = json.loads(content)
+            except json.JSONDecodeError:
+                # If that fails, try loading as JSONL
+                data = []
+                for line in content.splitlines():
+                    if line.strip():
+                        data.append(json.loads(line))
         
         # Convert to dataset format
         dataset = {"train": data}

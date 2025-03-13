@@ -47,16 +47,16 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 
 ## Dataset Information
 
-The dataset contains 277,284 examples with the following characteristics:
-- Total unique subjects: 250,503
-- Valid examples after filtering: 234,046
-- Data format: JSONL (one JSON object per line)
+The project uses a sample dataset for development and testing with the following characteristics:
+- Total examples: 20 samples
+- Data format: JSON array
+- Multi-label classification (papers can have multiple subjects)
 
 ### Data Split
 The dataset is split into three parts:
-- Training set: 163,832 samples (70%)
-- Validation set: 35,106 samples (15%)
-- Test set: 35,108 samples (15%)
+- Training set: 14 samples (70%)
+- Validation set: 3 samples (15%)
+- Test set: 3 samples (15%)
 
 ### Data Processing
 - Abstracts are tokenized using the Llama-7B tokenizer
