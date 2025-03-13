@@ -22,6 +22,9 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 │   └── config.yaml  # Model and training configurations
 ├── notebooks/        # Jupyter notebooks for analysis
 ├── tests/           # Unit tests
+│   ├── test_data_loader.py    # Data loading tests
+│   ├── test_model.py          # Model architecture tests
+│   └── test_training.py       # Training pipeline tests
 ├── results/         # Training results and model checkpoints
 ├── requirements.txt # Project dependencies
 └── README.md        # Project documentation
@@ -38,6 +41,7 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 - Scalable dataset extraction and processing
 - Multi-label metrics (F1-score, precision, recall)
 - Model checkpointing and evaluation
+- Comprehensive test suite for all components
 
 ## Dataset
 
@@ -123,6 +127,34 @@ Training features:
 - Model checkpointing based on F1-score
 - Comprehensive logging of training metrics
 
+### Testing
+
+The project includes a comprehensive test suite:
+
+1. Run all tests:
+```bash
+pytest
+```
+
+2. Run specific test files:
+```bash
+pytest tests/test_data_loader.py
+pytest tests/test_model.py
+pytest tests/test_training.py
+```
+
+3. Run tests with verbose output:
+```bash
+pytest -v
+```
+
+Test coverage includes:
+- Data loading and preprocessing
+- Model architecture and configuration
+- Training pipeline components
+- Metrics computation
+- Model initialization and setup
+
 ## Development
 
 - Format code: `black .`
@@ -139,6 +171,7 @@ Current implementation includes:
 - ✅ Dataset expansion (957 samples)
 - ✅ Training pipeline with multi-label support
 - ✅ Model evaluation and metrics
+- ✅ Comprehensive test suite
 - 🔄 Training monitoring and visualization (in progress)
 - 🔄 Early stopping implementation (in progress)
 
