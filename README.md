@@ -10,7 +10,7 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 │   ├── raw/          # Original data files
 │   └── processed/    # Processed and tokenized data
 │       ├── sample_data.json       # Initial test dataset (20 samples)
-│       └── expanded_dataset.json  # Expanded dataset (~1000 samples)
+│       └── expanded_dataset.json  # Expanded dataset (957 samples)
 ├── src/              # Source code
 │   ├── data/        # Data loading and processing
 │   │   ├── data_loader.py      # Data loading and preprocessing
@@ -36,11 +36,13 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 - Comprehensive logging and monitoring
 - Test suite for data loading and model verification
 - Scalable dataset extraction and processing
+- Multi-label metrics (F1-score, precision, recall)
+- Model checkpointing and evaluation
 
 ## Dataset
 
 The project uses a dataset of academic papers with:
-- ~1000 academic paper abstracts
+- 957 academic paper abstracts
 - 3,891 unique subject categories
 - Multi-label classification (papers can have multiple subjects)
 - Mix of English and German content
@@ -100,13 +102,26 @@ Test the model:
 python -m src.test_model
 ```
 
-### Training (Coming Soon)
+### Training
 
-Training functionality will be implemented in the next phase, including:
-- Custom training loop
-- Multi-label metrics
+The training pipeline includes:
+- Multi-label classification training
+- Evaluation metrics (F1-score, precision, recall)
 - Model checkpointing
-- Training monitoring
+- Training monitoring and logging
+- Automatic best model selection
+
+To train the model:
+```bash
+python -m src.train_model
+```
+
+Training features:
+- Configurable batch sizes and epochs
+- Weight decay for regularization
+- Automatic evaluation after each epoch
+- Model checkpointing based on F1-score
+- Comprehensive logging of training metrics
 
 ## Development
 
@@ -122,7 +137,10 @@ Current implementation includes:
 - ✅ Model architecture
 - ✅ Basic testing infrastructure
 - ✅ Dataset expansion (957 samples)
-- 🔄 Training implementation (in progress)
+- ✅ Training pipeline with multi-label support
+- ✅ Model evaluation and metrics
+- 🔄 Training monitoring and visualization (in progress)
+- 🔄 Early stopping implementation (in progress)
 
 ## License
 
