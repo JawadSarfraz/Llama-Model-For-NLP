@@ -78,23 +78,30 @@ class DataLoader:
             example.update(tokenized)
         
         # Split dataset
-        print("\nSplitting dataset into train/test...")
+        print("\nSplitting dataset into train/validation/test...")
         np.random.seed(self.config['data']['random_seed'])
         indices = np.random.permutation(len(dataset["train"]))
-        split_idx = int(len(indices) * (1 - self.config['data']['test_size']))
         
-        train_indices = indices[:split_idx]
-        test_indices = indices[split_idx:]
+        # Calculate split indices
+        train_size = int(len(indices) * self.config['data']['splits']['train_size'])
+        val_size = int(len(indices) * self.config['data']['splits']['val_size'])
+        
+        train_indices = indices[:train_size]
+        val_indices = indices[train_size:train_size + val_size]
+        test_indices = indices[train_size + val_size:]
         
         train_data = [dataset["train"][i] for i in train_indices]
+        val_data = [dataset["train"][i] for i in val_indices]
         test_data = [dataset["train"][i] for i in test_indices]
         
-        train_test_split = {
+        train_val_test_split = {
             "train": train_data,
+            "validation": val_data,
             "test": test_data
         }
         
-        print(f"Train set size: {len(train_test_split['train'])}")
-        print(f"Test set size: {len(train_test_split['test'])}")
+        print(f"Train set size: {len(train_val_test_split['train'])}")
+        print(f"Validation set size: {len(train_val_test_split['validation'])}")
+        print(f"Test set size: {len(train_val_test_split['test'])}")
         
-        return train_test_split, self.label_encoder 
+        return train_val_test_split, self.label_encoder 
