@@ -47,6 +47,9 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 
 The project uses a dataset of academic papers with:
 - 957 academic paper abstracts
+  - Training set: 670 samples (70%)
+  - Validation set: 143 samples (15%)
+  - Test set: 144 samples (15%)
 - 3,891 unique subject categories
 - Multi-label classification (papers can have multiple subjects)
 - Mix of English and German content
@@ -89,7 +92,7 @@ The data processing pipeline handles:
 - JSON data loading and preprocessing
 - Multi-label encoding
 - Text tokenization
-- Train/test splitting
+- Three-way data splitting (train/val/test)
 - Dataset expansion and sampling
 - Data validation and filtering
 
@@ -125,7 +128,9 @@ Training features:
 - Weight decay for regularization
 - Automatic evaluation after each epoch
 - Model checkpointing based on F1-score
-- Comprehensive logging of training metrics
+- Comprehensive logging (every 100 steps)
+- Checkpoint management (keeps last 3 checkpoints)
+- Three-way data split for better evaluation
 
 ### Testing
 
@@ -172,6 +177,7 @@ Current implementation includes:
 - ✅ Training pipeline with multi-label support
 - ✅ Model evaluation and metrics
 - ✅ Comprehensive test suite
+- ✅ Three-way data splitting
 - 🔄 Training monitoring and visualization (in progress)
 - 🔄 Early stopping implementation (in progress)
 
