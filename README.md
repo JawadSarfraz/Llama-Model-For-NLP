@@ -22,7 +22,7 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 │   └── config.yaml  # Model and training configurations
 ├── notebooks/        # Jupyter notebooks for analysis
 ├── tests/           # Unit tests
-│   ├── test_data_loader.py    # Data loading tests
+│   ├── test_data_loader.py    # Data loading and split tests
 │   ├── test_model.py          # Model architecture tests
 │   └── test_training.py       # Training pipeline tests
 ├── results/         # Training results and model checkpoints
@@ -42,6 +42,8 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 - Multi-label metrics (F1-score, precision, recall)
 - Model checkpointing and evaluation
 - Comprehensive test suite for all components
+- Three-way data splitting with configurable ratios
+- Automated testing of data processing pipeline
 
 ## Dataset
 
@@ -143,9 +145,9 @@ pytest
 
 2. Run specific test files:
 ```bash
-pytest tests/test_data_loader.py
-pytest tests/test_model.py
-pytest tests/test_training.py
+pytest tests/test_data_loader.py  # Test data loading and splits
+pytest tests/test_model.py        # Test model architecture
+pytest tests/test_training.py     # Test training pipeline
 ```
 
 3. Run tests with verbose output:
@@ -159,6 +161,9 @@ Test coverage includes:
 - Training pipeline components
 - Metrics computation
 - Model initialization and setup
+- Dataset splitting validation
+- Label encoding verification
+- Tokenization checks
 
 ## Development
 
