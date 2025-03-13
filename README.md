@@ -177,4 +177,4 @@ Current implementation includes:
 
 ## License
 
-MIT License 
+MIT License
