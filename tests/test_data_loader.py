@@ -34,8 +34,12 @@ def test_data_splitting(data_loader):
     
     # Check that no data is lost in splitting
     total_samples = len(splits["train"]) + len(splits["validation"]) + len(splits["test"])
-    with open(data_loader.config_path, 'r') as f:
-        original_data = json.load(f)
+    data_path = os.path.join(data_loader.project_root, data_loader.config['data']['raw_data_path'])
+    original_data = []
+    with open(data_path, 'r') as f:
+        for line in f:
+            if line.strip():  # Skip empty lines
+                original_data.append(json.loads(line))
     assert total_samples == len(original_data)  # Check no data was lost
     
     # Check that splits are approximately correct size
@@ -43,6 +47,13 @@ def test_data_splitting(data_loader):
     assert abs(len(splits["train"]) / total_size - 0.7) < 0.1  # 70% train
     assert abs(len(splits["validation"]) / total_size - 0.15) < 0.1  # 15% validation
     assert abs(len(splits["test"]) / total_size - 0.15) < 0.1  # 15% test
+    
+    # Print split sizes for verification
+    print(f"\nDataset split sizes:")
+    print(f"Total samples: {total_samples}")
+    print(f"Train: {len(splits['train'])} samples")
+    print(f"Validation: {len(splits['validation'])} samples")
+    print(f"Test: {len(splits['test'])} samples")
 
 def test_label_encoding(data_loader):
     """Test that labels are properly encoded"""
