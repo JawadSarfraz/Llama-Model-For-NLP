@@ -45,147 +45,25 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 - Three-way data splitting with configurable ratios
 - Automated testing of data processing pipeline
 
-## Dataset
+## Dataset Information
 
-The project uses a dataset of academic papers with:
-- 957 academic paper abstracts
-  - Training set: 670 samples (70%)
-  - Validation set: 143 samples (15%)
-  - Test set: 144 samples (15%)
-- 3,891 unique subject categories
-- Multi-label classification (papers can have multiple subjects)
-- Mix of English and German content
-- Comprehensive metadata including titles, authors, and publication info
+The dataset contains 277,284 examples with the following characteristics:
+- Total unique subjects: 250,503
+- Valid examples after filtering: 234,046
+- Data format: JSONL (one JSON object per line)
+
+### Data Split
+The dataset is split into three parts:
+- Training set: 163,832 samples (70%)
+- Validation set: 35,106 samples (15%)
+- Test set: 35,108 samples (15%)
+
+### Data Processing
+- Abstracts are tokenized using the Llama-7B tokenizer
+- Labels are encoded using MultiLabelBinarizer
+- Invalid examples (missing abstracts) are filtered out
 
 ## Setup
 
 1. Create a virtual environment:
-```bash
-python -m venv modelenv
-source modelenv/bin/activate  # On Windows: modelenv\Scripts\activate
 ```
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Set up Hugging Face token:
-- Create a `.env` file in the root directory
-- Add your Hugging Face token: `HF_TOKEN=your_token_here`
-
-## Usage
-
-### Data Processing
-
-The project includes several data processing utilities:
-
-1. Extract samples from source data:
-```bash
-python -m src.data.extract_samples
-```
-
-2. Test the data loader:
-```bash
-python -m src.test_data_loader
-```
-
-The data processing pipeline handles:
-- JSON data loading and preprocessing
-- Multi-label encoding
-- Text tokenization
-- Three-way data splitting (train/val/test)
-- Dataset expansion and sampling
-- Data validation and filtering
-
-### Model Implementation
-
-The model implementation features:
-- LLaMA-7B based architecture
-- Multi-label classification head
-- 8-bit quantization for memory efficiency
-- Configurable parameters via YAML
-
-Test the model:
-```bash
-python -m src.test_model
-```
-
-### Training
-
-The training pipeline includes:
-- Multi-label classification training
-- Evaluation metrics (F1-score, precision, recall)
-- Model checkpointing
-- Training monitoring and logging
-- Automatic best model selection
-
-To train the model:
-```bash
-python -m src.train_model
-```
-
-Training features:
-- Configurable batch sizes and epochs
-- Weight decay for regularization
-- Automatic evaluation after each epoch
-- Model checkpointing based on F1-score
-- Comprehensive logging (every 100 steps)
-- Checkpoint management (keeps last 3 checkpoints)
-- Three-way data split for better evaluation
-
-### Testing
-
-The project includes a comprehensive test suite:
-
-1. Run all tests:
-```bash
-pytest
-```
-
-2. Run specific test files:
-```bash
-pytest tests/test_data_loader.py  # Test data loading and splits
-pytest tests/test_model.py        # Test model architecture
-pytest tests/test_training.py     # Test training pipeline
-```
-
-3. Run tests with verbose output:
-```bash
-pytest -v
-```
-
-Test coverage includes:
-- Data loading and preprocessing
-- Model architecture and configuration
-- Training pipeline components
-- Metrics computation
-- Model initialization and setup
-- Dataset splitting validation
-- Label encoding verification
-- Tokenization checks
-
-## Development
-
-- Format code: `black .`
-- Sort imports: `isort .`
-- Run tests: `pytest`
-- Lint code: `flake8`
-
-## Project Status
-
-Current implementation includes:
-- ✅ Data loading and preprocessing
-- ✅ Model architecture
-- ✅ Basic testing infrastructure
-- ✅ Dataset expansion (957 samples)
-- ✅ Training pipeline with multi-label support
-- ✅ Model evaluation and metrics
-- ✅ Comprehensive test suite
-- ✅ Three-way data splitting
-- 🔄 Training monitoring and visualization (in progress)
-- 🔄 Early stopping implementation (in progress)
-
-## License
-
-MIT License
