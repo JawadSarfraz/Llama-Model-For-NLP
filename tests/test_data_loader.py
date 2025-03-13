@@ -2,6 +2,7 @@ import pytest
 import os
 import numpy as np
 from src.data.data_loader import DataLoader
+import json
 
 @pytest.fixture
 def config_path():
@@ -33,9 +34,9 @@ def test_data_splitting(data_loader):
     
     # Check that no data is lost in splitting
     total_samples = len(splits["train"]) + len(splits["validation"]) + len(splits["test"])
-    assert total_samples == len(data_loader.config["data"]["splits"]["train_size"]) + \
-           len(data_loader.config["data"]["splits"]["val_size"]) + \
-           len(data_loader.config["data"]["splits"]["test_size"])
+    with open(data_loader.config_path, 'r') as f:
+        original_data = json.load(f)
+    assert total_samples == len(original_data)  # Check no data was lost
     
     # Check that splits are approximately correct size
     total_size = total_samples
