@@ -51,16 +51,20 @@ def train_model():
         
         # Set up training arguments
         training_args = TrainingArguments(
-            output_dir="./results",
-            evaluation_strategy="epoch",
-            per_device_train_batch_size=8,
-            per_device_eval_batch_size=8,
-            num_train_epochs=3,
-            weight_decay=0.01,
-            metric_for_best_model="f1",
-            load_best_model_at_end=True,
-            logging_dir="./logs",
-            logging_steps=10,
+            output_dir=data_loader.config['training']['output_dir'],
+            evaluation_strategy=data_loader.config['training']['evaluation_strategy'],
+            save_strategy=data_loader.config['training']['save_strategy'],
+            per_device_train_batch_size=data_loader.config['training']['per_device_train_batch_size'],
+            per_device_eval_batch_size=data_loader.config['training']['per_device_eval_batch_size'],
+            num_train_epochs=data_loader.config['training']['num_train_epochs'],
+            learning_rate=data_loader.config['training']['learning_rate'],
+            weight_decay=data_loader.config['training']['weight_decay'],
+            warmup_steps=data_loader.config['training']['warmup_steps'],
+            logging_steps=data_loader.config['training']['logging_steps'],
+            metric_for_best_model=data_loader.config['training']['metric_for_best_model'],
+            load_best_model_at_end=data_loader.config['training']['load_best_model_at_end'],
+            save_total_limit=data_loader.config['training']['save_total_limit'],
+            greater_is_better=data_loader.config['training']['greater_is_better']
         )
         
         # Initialize trainer

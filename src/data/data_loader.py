@@ -92,9 +92,10 @@ class DataLoader:
         np.random.seed(self.config['data']['random_seed'])
         indices = np.random.permutation(len(dataset["train"]))
         
-        # Calculate split indices
-        train_size = int(len(indices) * self.config['data']['splits']['train_size'])
-        val_size = int(len(indices) * self.config['data']['splits']['val_size'])
+        # Calculate split indices using new config format
+        test_size = int(len(indices) * self.config['data']['test_split'])
+        val_size = int(len(indices) * self.config['data']['validation_split'])
+        train_size = len(indices) - test_size - val_size
         
         train_indices = indices[:train_size]
         val_indices = indices[train_size:train_size + val_size]
