@@ -44,6 +44,77 @@ pip install -r requirements.txt
 HF_TOKEN=your_token_here
 ```
 
+## Model Architecture
+
+### Base Model
+- Model: LLaMA-7B (Meta AI)
+- Architecture: Transformer-based language model
+- Base model size: 7 billion parameters
+- Quantization: 4-bit with double quantization
+- Compute dtype: float16
+- Quantization type: nf4 (NormalFloat4)
+
+### Fine-tuning Configuration
+- Method: Parameter-Efficient Fine-Tuning (PEFT) with LoRA
+- LoRA Parameters:
+  - Rank (r): 16
+  - Alpha scaling: 32
+  - Target modules: q_proj, k_proj, v_proj, o_proj
+  - Dropout: 0.05
+  - Task type: SEQ_CLS (Sequence Classification)
+
+### Memory Optimization
+- 4-bit quantization for reduced memory footprint
+- Double quantization for additional memory savings
+- Gradient checkpointing enabled
+- Mixed precision training (fp16)
+- Automatic device mapping for optimal resource utilization
+
+### Training Configuration
+- Batch size: 2 (with gradient accumulation)
+- Learning rate: 2e-5
+- Weight decay: 0.01
+- Number of epochs: 3
+- Warmup steps: 100
+- Evaluation strategy: Per epoch
+- Save strategy: Per epoch
+- Gradient clipping: 1.0
+- Model checkpointing: Keep best 3 checkpoints
+- Metrics: F1-score, precision, recall
+
+### Data Processing
+- Maximum sequence length: 512 tokens
+- Tokenization: LLaMA tokenizer
+- Padding: Max length
+- Truncation: Enabled
+- Label encoding: Multi-label binarization
+- Dataset splits:
+  - Training: 70%
+  - Validation: 15%
+  - Test: 15%
+
+## Training Results
+
+### Dataset Statistics
+- Total examples: 20
+- Training set: 14 examples
+- Validation set: 3 examples
+- Test set: 3 examples
+- Number of unique subjects: 202
+
+### Performance Metrics
+- Final training loss: 1.2969
+- Evaluation metrics:
+  - F1 Score: 0.3442 (34.42%)
+  - Precision: 0.2667 (26.67%)
+  - Recall: 0.5500 (55.00%)
+
+### Training Duration
+- Total training time: ~2.5 minutes
+- Average time per epoch: ~45 seconds
+- Checkpoint saving: Every epoch
+- Model size after training: ~9.8GB (including all dependencies)
+
 ## Features
 
 - Multi-label classification using LLaMA-7B model
@@ -60,52 +131,6 @@ HF_TOKEN=your_token_here
 - Comprehensive test suite for all components
 - Three-way data splitting with configurable ratios
 - Automated testing of data processing pipeline
-
-## Model Architecture
-
-The project uses a YAML configuration file (`configs/config.yaml`) for managing:
-
-### Model Configuration
-- Base model: LLaMA-7B (4-bit quantized)
-- Fine-tuning method: PEFT with LoRA
-- LoRA parameters:
-  - Rank (r): 16
-  - Alpha scaling: 32
-  - Target modules: q_proj, k_proj, v_proj, o_proj
-  - Dropout: 0.05
-- Maximum sequence length: 512 tokens
-- Problem type: Multi-label classification
-- Quantization settings for memory efficiency
-
-### Training Configuration
-- Output directory: `./results`
-- Batch sizes: 2 (train/eval)
-- Learning rate: 2e-5
-- Number of epochs: 3
-- Evaluation strategy: Per epoch
-- Save strategy: Per epoch
-- Model checkpointing: Keep best 3 checkpoints
-- Metrics: F1-score, precision, recall
-
-### Data Configuration
-- Dataset splits:
-  - Training: 70%
-  - Validation: 15%
-  - Test: 15%
-- Random seed: 42
-- Tokenization settings:
-  - Truncation: Enabled
-  - Padding: Max length
-
-## Data Processing
-
-The data processing pipeline includes:
-1. Loading and validating JSON/JSONL data
-2. Filtering invalid examples
-3. Creating subject vocabulary
-4. Encoding labels using MultiLabelBinarizer
-5. Tokenizing abstracts with LLaMA tokenizer
-6. Splitting data into train/validation/test sets
 
 ## Usage
 
@@ -133,18 +158,26 @@ pytest tests/
 
 ## Requirements
 
+### Hardware Requirements
+- GPU with at least 16GB VRAM
+- 32GB system RAM recommended
+- CUDA 11.7 compatible
+
+### Software Requirements
 - Python 3.10+
-- PyTorch
-- Transformers
-- PEFT
-- NumPy
-- PyYAML
-- Pytest
-- Datasets
-- BitsAndBytes
-- scikit-learn
-- Accelerate
-- Joblib
+- PyTorch 2.0.1
+- Transformers 4.49.0
+- PEFT 0.14.0
+- NumPy 1.21.5+
+- scikit-learn 1.0.2+
+- PyYAML 5.4.1+
+- Pytest 7.0.0+
+- Black 23.3.0+
+- isort 5.12.0+
+- flake8 6.0.0+
+- bitsandbytes 0.41.1+
+- accelerate 0.21.0+
+- joblib 1.3.0+
 
 ## License
 
