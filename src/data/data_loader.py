@@ -5,6 +5,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 import yaml
 import os
 import json
+import torch
 
 class DataLoader:
     def __init__(self, config_path):
@@ -71,9 +72,11 @@ class DataLoader:
         print("\nEncoding labels...")
         for example in dataset["train"]:
             if "subject" in example and example["subject"]:
-                example["labels"] = self.label_encoder.transform([example["subject"]])[0]
+                labels = self.label_encoder.transform([example["subject"]])[0]
             else:
-                example["labels"] = np.zeros(len(self.label_encoder.classes_))
+                labels = np.zeros(len(self.label_encoder.classes_))
+            # Convert to float tensor
+            example["labels"] = torch.tensor(labels, dtype=torch.float32)
         
         # Tokenize dataset
         print("\nTokenizing abstracts...")
@@ -85,6 +88,9 @@ class DataLoader:
                 padding="max_length",
                 max_length=self.config['model']['max_length']
             )
+            # Convert tokenized inputs to tensors
+            for key in tokenized:
+                tokenized[key] = torch.tensor(tokenized[key])
             example.update(tokenized)
         
         # Split dataset

@@ -44,7 +44,7 @@ class SubjectClassifier:
             target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],  # Target modules for LoRA
             lora_dropout=0.05,
             bias="none",
-            task_type="SEQUENCE_CLASSIFICATION"
+            task_type="SEQ_CLS"
         )
         
         # Get PEFT model
