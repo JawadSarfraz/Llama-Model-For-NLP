@@ -44,36 +44,47 @@ pip install -r requirements.txt
 HF_TOKEN=your_token_here
 ```
 
-- Multi-label classification using LLaMA-7B model
-- Efficient data loading and preprocessing
-- Support for academic paper abstracts
-- Configurable model parameters
-- Comprehensive logging and monitoring
-- Test suite for data loading and model verification
-- Scalable dataset extraction and processing
-- Multi-label metrics (F1-score, precision, recall)
-- Model checkpointing and evaluation
-- Comprehensive test suite for all components
-- Three-way data splitting with configurable ratios
-- Automated testing of data processing pipeline
+## Configuration
 
 The project uses a YAML configuration file (`configs/config.yaml`) for managing:
-- Model parameters
-- Training settings
-- Data paths and splits
-- Evaluation metrics
 
-## Data
+### Model Configuration
+- Base model: LLaMA-7B (4-bit quantized)
+- Maximum sequence length: 512 tokens
+- Problem type: Multi-label classification
+- Quantization settings for memory efficiency
 
-The project uses a sample dataset with the following split:
-- Training: 70% of samples
-- Validation: 15% of samples
-- Test: 15% of samples
+### Training Configuration
+- Output directory: `./results`
+- Batch sizes: 2 (train/eval)
+- Learning rate: 2e-5
+- Number of epochs: 3
+- Evaluation strategy: Per epoch
+- Save strategy: Per epoch
+- Model checkpointing: Keep best 3 checkpoints
+- Metrics: F1-score, precision, recall
 
-### Data Processing
-- Abstracts are tokenized using the Llama-7B tokenizer
-- Labels are encoded using MultiLabelBinarizer
-- Invalid examples (missing abstracts) are filtered out
+### Data Configuration
+- Dataset splits:
+  - Training: 70%
+  - Validation: 15%
+  - Test: 15%
+- Random seed: 42
+- Tokenization settings:
+  - Truncation: Enabled
+  - Padding: Max length
+
+## Data Processing
+
+The data processing pipeline includes:
+1. Loading and validating JSON/JSONL data
+2. Filtering invalid examples
+3. Creating subject vocabulary
+4. Encoding labels using MultiLabelBinarizer
+5. Tokenizing abstracts with LLaMA tokenizer
+6. Splitting data into train/validation/test sets
+
+## Usage
 
 1. Training the model:
 ```bash
@@ -87,10 +98,12 @@ pytest tests/
 
 ## Model Details
 
-- Base model: LLaMA-7B (quantized version)
+- Base model: LLaMA-7B (4-bit quantized version)
 - Task: Multi-label classification
 - Input: Paper abstracts
 - Output: Subject category predictions
+- Memory optimization: 4-bit quantization
+- Training metrics: F1-score, precision, recall
 
 ## Requirements
 
@@ -102,6 +115,7 @@ pytest tests/
 - Pytest
 - Datasets
 - BitsAndBytes
+- scikit-learn
 
 ## License
 
