@@ -5,6 +5,7 @@ from pathlib import Path
 from transformers import Trainer, TrainingArguments
 from sklearn.metrics import f1_score, precision_score, recall_score
 import numpy as np
+from peft import PeftModel
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -81,9 +82,14 @@ def train_model():
         logger.info("Starting training...")
         trainer.train()
         
-        # Save the model
-        logger.info("Saving model...")
-        trainer.save_model("./results/final_model")
+        # Save the PEFT model
+        logger.info("Saving PEFT model...")
+        peft_model_path = os.path.join(data_loader.config['training']['output_dir'], "final_model")
+        trainer.save_model(peft_model_path)
+        
+        # Save the label encoder
+        import joblib
+        joblib.dump(label_encoder, os.path.join(peft_model_path, "label_encoder.joblib"))
         
         # Evaluate the model
         logger.info("Evaluating model...")

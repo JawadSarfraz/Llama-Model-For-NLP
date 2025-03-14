@@ -44,7 +44,18 @@ pip install -r requirements.txt
 HF_TOKEN=your_token_here
 ```
 
-## Configuration
+- Multi-label classification using LLaMA-7B model
+- Efficient data loading and preprocessing
+- Support for academic paper abstracts
+- Configurable model parameters
+- Comprehensive logging and monitoring
+- Test suite for data loading and model verification
+- Scalable dataset extraction and processing
+- Multi-label metrics (F1-score, precision, recall)
+- Model checkpointing and evaluation
+- Comprehensive test suite for all components
+- Three-way data splitting with configurable ratios
+- Automated testing of data processing pipeline
 
 The project uses a YAML configuration file (`configs/config.yaml`) for managing:
 
