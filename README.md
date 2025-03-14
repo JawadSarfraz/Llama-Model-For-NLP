@@ -14,7 +14,7 @@ This project implements a multi-label classification system using the LLaMA-7B m
 │   ├── data/
 │   │   └── data_loader.py # Data loading and preprocessing
 │   ├── model/
-│   │   └── model.py       # Model architecture
+│   │   └── model.py       # Model architecture with PEFT
 │   └── train_model.py     # Training script
 ├── tests/
 │   └── test_data_loader.py # Data loader tests
@@ -44,7 +44,11 @@ pip install -r requirements.txt
 HF_TOKEN=your_token_here
 ```
 
+## Features
+
 - Multi-label classification using LLaMA-7B model
+- Parameter-Efficient Fine-Tuning (PEFT) with LoRA
+- 4-bit quantization for memory efficiency
 - Efficient data loading and preprocessing
 - Support for academic paper abstracts
 - Configurable model parameters
@@ -57,10 +61,18 @@ HF_TOKEN=your_token_here
 - Three-way data splitting with configurable ratios
 - Automated testing of data processing pipeline
 
+## Model Architecture
+
 The project uses a YAML configuration file (`configs/config.yaml`) for managing:
 
 ### Model Configuration
 - Base model: LLaMA-7B (4-bit quantized)
+- Fine-tuning method: PEFT with LoRA
+- LoRA parameters:
+  - Rank (r): 16
+  - Alpha scaling: 32
+  - Target modules: q_proj, k_proj, v_proj, o_proj
+  - Dropout: 0.05
 - Maximum sequence length: 512 tokens
 - Problem type: Multi-label classification
 - Quantization settings for memory efficiency
@@ -110,10 +122,13 @@ pytest tests/
 ## Model Details
 
 - Base model: LLaMA-7B (4-bit quantized version)
+- Fine-tuning: PEFT with LoRA adapters
 - Task: Multi-label classification
 - Input: Paper abstracts
 - Output: Subject category predictions
-- Memory optimization: 4-bit quantization
+- Memory optimization: 
+  - 4-bit quantization
+  - LoRA for efficient fine-tuning
 - Training metrics: F1-score, precision, recall
 
 ## Requirements
@@ -121,12 +136,15 @@ pytest tests/
 - Python 3.10+
 - PyTorch
 - Transformers
+- PEFT
 - NumPy
 - PyYAML
 - Pytest
 - Datasets
 - BitsAndBytes
 - scikit-learn
+- Accelerate
+- Joblib
 
 ## License
 
