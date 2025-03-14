@@ -1,36 +1,48 @@
-# Subject Classification Model
+# LLaMA-7B Multi-Label Classification
 
-A deep learning model for classifying academic paper abstracts into multiple subject categories using the LLaMA model. This project implements a multi-label classification system that can predict multiple subject categories for academic papers based on their abstracts.
+This project implements a multi-label classification system using the LLaMA-7B model for scientific paper classification. The system is designed to classify papers into multiple subject categories based on their abstracts.
 
 ## Project Structure
 
 ```
 .
-├── data/              # Data files
-│   ├── raw/          # Original data files
-│   └── processed/    # Processed and tokenized data
-│       ├── sample_data.json       # Initial test dataset (20 samples)
-│       └── expanded_dataset.json  # Expanded dataset (957 samples)
-├── src/              # Source code
-│   ├── data/        # Data loading and processing
-│   │   ├── data_loader.py      # Data loading and preprocessing
-│   │   └── extract_samples.py  # Dataset expansion utilities
-│   ├── models/      # Model implementation
-│   │   └── model.py
-│   └── utils/       # Utility functions
-├── configs/          # Configuration files
-│   └── config.yaml  # Model and training configurations
-├── notebooks/        # Jupyter notebooks for analysis
-├── tests/           # Unit tests
-│   ├── test_data_loader.py    # Data loading and split tests
-│   ├── test_model.py          # Model architecture tests
-│   └── test_training.py       # Training pipeline tests
-├── results/         # Training results and model checkpoints
-├── requirements.txt # Project dependencies
-└── README.md        # Project documentation
+├── configs/
+│   └── config.yaml         # Configuration file
+├── data/
+│   └── processed/         # Processed datasets
+├── src/
+│   ├── data/
+│   │   └── data_loader.py # Data loading and preprocessing
+│   ├── model/
+│   │   └── model.py       # Model architecture
+│   └── train_model.py     # Training script
+├── tests/
+│   └── test_data_loader.py # Data loader tests
+├── .env                   # Environment variables (HF_TOKEN)
+├── .gitignore            # Git ignore rules
+├── requirements.txt      # Python dependencies
+└── README.md            # This file
 ```
 
-## Features
+## Setup
+
+1. Create and activate virtual environment:
+```bash
+python3 -m venv modelenv
+source modelenv/bin/activate
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Configure Hugging Face token:
+- Create a `.env` file in the project root
+- Add your Hugging Face token:
+```
+HF_TOKEN=your_token_here
+```
 
 - Multi-label classification using LLaMA-7B model
 - Efficient data loading and preprocessing
@@ -45,25 +57,52 @@ A deep learning model for classifying academic paper abstracts into multiple sub
 - Three-way data splitting with configurable ratios
 - Automated testing of data processing pipeline
 
-## Dataset Information
+The project uses a YAML configuration file (`configs/config.yaml`) for managing:
+- Model parameters
+- Training settings
+- Data paths and splits
+- Evaluation metrics
 
-The project uses a sample dataset for development and testing with the following characteristics:
-- Total examples: 20 samples
-- Data format: JSON array
-- Multi-label classification (papers can have multiple subjects)
+## Data
 
-### Data Split
-The dataset is split into three parts:
-- Training set: 14 samples (70%)
-- Validation set: 3 samples (15%)
-- Test set: 3 samples (15%)
+The project uses a sample dataset with the following split:
+- Training: 70% of samples
+- Validation: 15% of samples
+- Test: 15% of samples
 
 ### Data Processing
 - Abstracts are tokenized using the Llama-7B tokenizer
 - Labels are encoded using MultiLabelBinarizer
 - Invalid examples (missing abstracts) are filtered out
 
-## Setup
-
-1. Create a virtual environment:
+1. Training the model:
+```bash
+python3 -m src.train_model
 ```
+
+2. Running tests:
+```bash
+pytest tests/
+```
+
+## Model Details
+
+- Base model: LLaMA-7B (quantized version)
+- Task: Multi-label classification
+- Input: Paper abstracts
+- Output: Subject category predictions
+
+## Requirements
+
+- Python 3.10+
+- PyTorch
+- Transformers
+- NumPy
+- PyYAML
+- Pytest
+- Datasets
+- BitsAndBytes
+
+## License
+
+[Your License Here]
