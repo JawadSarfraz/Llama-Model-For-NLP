@@ -1,29 +1,40 @@
 model:
   name: "huggyllama/llama-7b"
-  max_length: 80
+  quantization:
+    load_in_4bit: true
+    bnb_4bit_compute_dtype: "float16"
+    bnb_4bit_use_double_quant: true
+    bnb_4bit_quant_type: "nf4"
+  max_length: 512
   num_labels: null  # Will be set dynamically based on dataset
   problem_type: "multi_label_classification"
 
 training:
-  output_dir: "./results"
-  evaluation_strategy: "epoch"
-  save_strategy: "epoch"  # Match evaluation strategy
-  per_device_train_batch_size: 8
-  per_device_eval_batch_size: 8
+  output_dir: "results"
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
   num_train_epochs: 3
+  learning_rate: 2e-5
   weight_decay: 0.01
-  metric_for_best_model: "f1"
+  warmup_steps: 100
+  logging_steps: 10
+  evaluation_strategy: "epoch"
+  save_strategy: "epoch"
   load_best_model_at_end: true
-  save_total_limit: 3  # Keep only the last 3 checkpoints
-  logging_steps: 100    # Log every 50 steps
+  save_total_limit: 3
+  metric_for_best_model: "f1"
+  greater_is_better: true
 
 data:
   raw_data_path: "data/data.json"
   sample_data_path: "data/processed/sample_data.json"
-  splits:
-    train_size: 0.7    # ~670 samples
-    val_size: 0.15     # ~143 samples
-    test_size: 0.15    # ~144 samples
+  train_path: "data/processed/sample_data.json"
+  test_path: "data/processed/sample_data.json"
+  validation_split: 0.15
+  test_split: 0.15
+  max_length: 512
+  truncation: true
+  padding: "max_length"
   random_seed: 42
 
 paths:
