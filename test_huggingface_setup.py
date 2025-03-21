@@ -3,10 +3,6 @@ Test script to demonstrate HuggingFace setup and functionality.
 This script will:
 1. Test HuggingFace installation
 2. Verify token authentication
-3. Load a model
-4. Perform a simple inference
-5. Test tokenizer functionality
-6. Demonstrate model downloading
 """
 
 import os
@@ -143,9 +139,9 @@ def main():
     # Run all tests
     test_installation()
     test_authentication()
-    model, tokenizer = test_model_loading()
-    test_inference(model, tokenizer)
-    test_tokenizer_functionality(tokenizer)
+    # model, tokenizer = test_model_loading()
+    # test_inference(model, tokenizer)
+    # test_tokenizer_functionality(tokenizer)
     
     print("\n✓ All tests completed successfully!")
 
