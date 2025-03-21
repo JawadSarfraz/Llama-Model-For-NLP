@@ -29,16 +29,22 @@ class DataLoader:
         data_path = os.path.join(self.project_root, self.config['data']['sample_data_path'])
         print(f"\nLoading dataset from {data_path}")
         
-        # Load dataset as JSONL
-        data = []
+        # Load dataset
         with open(data_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                if line.strip():
-                    try:
-                        data.append(json.loads(line.strip()))
-                    except json.JSONDecodeError as e:
-                        print(f"Warning: Skipping invalid JSON line: {e}")
-                        continue
+            content = f.read().strip()
+            if content.startswith('['):
+                # JSON array format
+                data = json.loads(content)
+            else:
+                # JSONL format
+                data = []
+                for line in content.splitlines():
+                    if line.strip():
+                        try:
+                            data.append(json.loads(line.strip()))
+                        except json.JSONDecodeError as e:
+                            print(f"Warning: Skipping invalid JSON line: {e}")
+                            continue
         
         # Convert to dataset format
         dataset = {"train": data}
