@@ -182,3 +182,47 @@ pytest tests/
 ## License
 
 [Your License Here]
+
+## Testing HuggingFace Setup
+
+The project includes a test script `test_huggingface_setup.py` to verify HuggingFace installation and functionality:
+
+```bash
+python3 test_huggingface_setup.py
+```
+
+The test script verifies:
+1. **Installation Check**
+   - Transformers library version
+   - PyTorch installation and CUDA availability
+   - Required dependencies
+
+2. **Authentication**
+   - HuggingFace token validation
+   - API access verification
+   - User authentication status
+
+3. **Model Operations**
+   - Model loading capabilities
+   - Tokenizer functionality
+   - Basic inference testing
+   - Performance metrics
+
+### Test Script Output Example
+```
+HuggingFace Setup Test Script
+Time: 2024-03-14 10:00:00
+
+=====================================
+ 1. Testing HuggingFace Installation 
+=====================================
+✓ transformers version: 4.49.0
+✓ PyTorch version: 2.0.1
+✓ CUDA available: True
+...
+```
+
+### Prerequisites for Testing
+1. Valid HuggingFace token in `.env` file
+2. Python environment with required packages
+3. Internet connection for model downloading
