@@ -226,3 +226,87 @@ Time: 2024-03-14 10:00:00
 1. Valid HuggingFace token in `.env` file
 2. Python environment with required packages
 3. Internet connection for model downloading
+
+## Subject Classification with LLaMA-7B
+
+This project implements a multi-label subject classifier using the LLaMA-7B model with 4-bit quantization and LoRA fine-tuning.
+
+## Project Structure
+
+```
+project/
+├── configs/
+│   └── config.yaml        # Configuration management
+├── src/
+│   ├── data/
+│   │   └── data_loader.py # Data handling
+│   ├── models/
+│   │   └── model.py      # Model architecture
+│   └── train_model.py    # Training pipeline
+├── test_huggingface_setup.py  # Testing infrastructure
+├── predict_subjects.py   # Script for predicting subjects
+└── requirements.txt      # Dependencies
+```
+
+## Setup
+
+1. Create and activate virtual environment:
+```bash
+python3 -m venv modelenv
+source modelenv/bin/activate
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Set up Hugging Face token:
+```bash
+export HUGGINGFACE_TOKEN=your_token_here
+```
+
+## Training
+
+To train the model:
+```bash
+python3 -m src.train_model
+```
+
+## Predicting Subjects
+
+To predict subjects from an abstract:
+
+```bash
+python3 predict_subjects.py --abstract "Your abstract text here"
+```
+
+Example:
+```bash
+python3 predict_subjects.py --abstract "This paper presents a novel quantum computing algorithm for solving complex mathematical problems using advanced physics principles."
+```
+
+The script will output the predicted subjects for the given abstract.
+
+## Model Configuration
+
+The model uses:
+- LLaMA-7B base model
+- 4-bit quantization for memory efficiency
+- LoRA for parameter-efficient fine-tuning
+- Multi-label classification for subject prediction
+
+## Testing
+
+To test the Hugging Face setup:
+```bash
+python3 test_huggingface_setup.py
+```
+
+## Requirements
+
+- Python 3.8+
+- PyTorch
+- Transformers
+- PEFT
+- Other dependencies listed in requirements.txt
