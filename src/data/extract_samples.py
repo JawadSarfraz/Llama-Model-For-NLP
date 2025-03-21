@@ -36,8 +36,8 @@ def extract_samples(input_file: str, output_file: str, num_samples: int = 1000):
                     if has_subject and has_abstract:
                         entries_with_both += 1
                     
-                    # Only check for subject field
-                    if has_subject:
+                    # Only add entries that have both subject and abstract
+                    if has_subject and has_abstract:
                         objects.append(entry)
                         
                 except json.JSONDecodeError as e:
