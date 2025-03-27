@@ -4,19 +4,23 @@ import json
 input_file_path = 'data/data.json'
 output_file_path = 'data/sample_data.json'
 
-# List to store the first 1000 JSON objects
+# List to store the first 1000 JSON objects with subjects
 objects = []
+total_processed = 0
 
 # Open and read the file line by line
 try:
     with open(input_file_path, 'r') as file:
         for i, line in enumerate(file):
+            total_processed += 1
             if len(objects) >= 1000:  # Stop after getting 1000 valid objects
                 break
             try:
-                # Convert each line to a JSON object and append to the list
+                # Convert each line to a JSON object
                 obj = json.loads(line.strip())
-                objects.append(obj)
+                # Only include objects that have subject field
+                if 'subject' in obj and obj['subject']:
+                    objects.append(obj)
             except json.JSONDecodeError as e:
                 print(f"Error decoding JSON on line {i+1}: {e}")
 
@@ -24,7 +28,9 @@ try:
     with open(output_file_path, 'w') as outfile:
         json.dump(objects, outfile, indent=2)
 
-    print(f"Successfully extracted {len(objects)} objects.")
+    print(f"\nProcessing complete!")
+    print(f"Total objects processed: {total_processed}")
+    print(f"Valid objects with subjects extracted: {len(objects)}")
     print(f"Output saved to: {output_file_path}")
     
 except FileNotFoundError:
