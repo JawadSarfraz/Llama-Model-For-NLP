@@ -96,11 +96,12 @@ HF_TOKEN=your_token_here
 ## Training Results
 
 ### Dataset Statistics
-- Total examples: 1000
-- Training set: 700 examples
-- Validation set: 150 examples
-- Test set: 150 examples
-- Number of unique subjects: 202
+- Total examples: 1000 (filtered to include only papers with subjects)
+- Training set: 700 examples (70%)
+- Validation set: 150 examples (15%)
+- Test set: 150 examples (15%)
+- Data filtering: Only papers with valid subject fields are included
+- Source: Research paper abstracts with subject classifications
 
 ### Performance Metrics
 - Final training loss: 1.2969
