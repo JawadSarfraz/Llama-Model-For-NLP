@@ -96,10 +96,10 @@ HF_TOKEN=your_token_here
 ## Training Results
 
 ### Dataset Statistics
-- Total examples: 20
-- Training set: 14 examples
-- Validation set: 3 examples
-- Test set: 3 examples
+- Total examples: 1000
+- Training set: 700 examples
+- Validation set: 150 examples
+- Test set: 150 examples
 - Number of unique subjects: 202
 
 ### Performance Metrics
