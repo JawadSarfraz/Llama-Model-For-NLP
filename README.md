@@ -1,6 +1,6 @@
 # Research Paper Subject Classification
 
-This project implements a multi-label classification system for research papers using the Mistral-7B language model. The system is designed to classify research paper abstracts into relevant subjects.
+This project implements a multi-label classification system for research papers using the LLaMA-7B language model. The system is designed to classify research paper abstracts into relevant subjects.
 
 ## Project Structure
 
@@ -32,7 +32,7 @@ The dataset consists of research papers with their abstracts and subjects. Key s
 The project uses the following setup for training:
 
 ### Base Model
-- Model: Mistral-7B-v0.1
+- Model: LLaMA-7B
 - Precision: 4-bit quantization
 - Framework: Hugging Face Transformers
 
@@ -78,7 +78,7 @@ python3 train_model.py
 ```
 
 The training process will:
-- Download the Mistral-7B model
+- Download the LLaMA-7B model
 - Apply LoRA configuration
 - Train on the prepared dataset
 - Save checkpoints every 100 steps
