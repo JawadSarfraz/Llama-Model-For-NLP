@@ -4,7 +4,7 @@ import json
 input_file_path = 'data/data.json'
 output_file_path = 'data/sample_data.json'
 
-# List to store the first 1000 JSON objects with subjects
+# List to store the first 5000 JSON objects with subjects
 objects = []
 total_processed = 0
 
@@ -13,7 +13,7 @@ try:
     with open(input_file_path, 'r') as file:
         for i, line in enumerate(file):
             total_processed += 1
-            if len(objects) >= 1000:  # Stop after getting 1000 valid objects
+            if len(objects) >= 5000:  # Stop after getting 5000 valid objects
                 break
             try:
                 # Convert each line to a JSON object
