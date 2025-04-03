@@ -96,10 +96,10 @@ HF_TOKEN=your_token_here
 ## Training Results
 
 ### Dataset Statistics
-- Total examples: 1000 (filtered to include only papers with subjects)
-- Training set: 700 examples (70%)
-- Validation set: 150 examples (15%)
-- Test set: 150 examples (15%)
+- Total examples: 5000 (filtered to include only papers with subjects)
+- Training set: 3500 examples (70%)
+- Validation set: 750 examples (15%)
+- Test set: 750 examples (15%)
 - Data filtering: Only papers with valid subject fields are included
 - Source: Research paper abstracts with subject classifications
 
