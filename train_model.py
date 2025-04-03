@@ -70,6 +70,10 @@ class MetricsCallback:
             'learning_rate': []
         }
     
+    def on_init_end(self, args, state, control, **kwargs):
+        """Called when the trainer is initialized."""
+        pass
+    
     def on_log(self, args, state, control, logs=None, **kwargs):
         if logs is not None:
             # Log to TensorBoard
