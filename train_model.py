@@ -35,7 +35,7 @@ def format_prompt(example: Dict) -> Dict:
 def main():
     # Load model and tokenizer
     print("Loading model and tokenizer...")
-    model_name = "mistralai/Mistral-7B-v0.1"  # Using Mistral-7B instead of LLaMA-2
+    model_name = "meta-llama/Llama-2-7b-hf"  # Using LLaMA-7B which is already installed
     
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
