@@ -74,6 +74,37 @@ class MetricsCallback:
         """Called when the trainer is initialized."""
         pass
     
+    def on_train_begin(self, args, state, control, **kwargs):
+        """Called when training begins."""
+        pass
+    
+    def on_train_end(self, args, state, control, **kwargs):
+        """Called when training ends."""
+        self.writer.close()
+    
+    def on_epoch_begin(self, args, state, control, **kwargs):
+        """Called when an epoch begins."""
+        pass
+    
+    def on_epoch_end(self, args, state, control, **kwargs):
+        """Called when an epoch ends."""
+        pass
+    
+    def on_step_begin(self, args, state, control, **kwargs):
+        """Called when a training step begins."""
+        pass
+    
+    def on_step_end(self, args, state, control, **kwargs):
+        """Called when a training step ends."""
+        pass
+    
+    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+        """Called after evaluation."""
+        if metrics:
+            for key, value in metrics.items():
+                if isinstance(value, (int, float)):
+                    self.writer.add_scalar(f"eval/{key}", value, state.global_step)
+    
     def on_log(self, args, state, control, logs=None, **kwargs):
         if logs is not None:
             # Log to TensorBoard
