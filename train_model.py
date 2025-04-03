@@ -17,6 +17,10 @@ from peft import (
 from datasets import Dataset
 import os
 from typing import Dict, List
+import logging
+from datetime import datetime
+from torch.utils.tensorboard import SummaryWriter
+import numpy as np
 
 def load_dataset(split: str) -> Dataset:
     """Load and format dataset split."""
@@ -33,9 +37,66 @@ def format_prompt(example: Dict) -> Dict:
     text = f"{example['input']}\n\n{example['output']}"
     return {"text": text}
 
+# Set up logging
+def setup_logging():
+    # Create logs directory if it doesn't exist
+    os.makedirs("logs", exist_ok=True)
+    
+    # Create a timestamp for unique log files
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Set up file logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(f"logs/training_{timestamp}.log"),
+            logging.StreamHandler()
+        ]
+    )
+    
+    # Create TensorBoard writer
+    writer = SummaryWriter(f"logs/tensorboard_{timestamp}")
+    
+    return writer
+
+# Custom callback for logging metrics
+class MetricsCallback:
+    def __init__(self, writer):
+        self.writer = writer
+        self.metrics_history = {
+            'train_loss': [],
+            'eval_loss': [],
+            'learning_rate': []
+        }
+    
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        if logs is not None:
+            # Log to TensorBoard
+            for key, value in logs.items():
+                if isinstance(value, (int, float)):
+                    self.writer.add_scalar(f"metrics/{key}", value, state.global_step)
+            
+            # Save metrics to history
+            if 'loss' in logs:
+                self.metrics_history['train_loss'].append(logs['loss'])
+            if 'eval_loss' in logs:
+                self.metrics_history['eval_loss'].append(logs['eval_loss'])
+            if 'learning_rate' in logs:
+                self.metrics_history['learning_rate'].append(logs['learning_rate'])
+            
+            # Save metrics history to file periodically
+            if state.global_step % 100 == 0:
+                with open('logs/metrics_history.json', 'w') as f:
+                    json.dump(self.metrics_history, f)
+
 def main():
+    # Set up logging
+    writer = setup_logging()
+    logging.info("Starting training process")
+    
     # Load model and tokenizer
-    print("Loading model and tokenizer...")
+    logging.info("Loading model and tokenizer...")
     model_name = "huggyllama/llama-7b"  # Using the open source version
     
     # Load tokenizer
@@ -43,6 +104,7 @@ def main():
     tokenizer.pad_token = tokenizer.eos_token
     
     # Configure quantization
+    logging.info("Configuring model quantization...")
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_compute_dtype=torch.float16,
@@ -51,7 +113,7 @@ def main():
     )
     
     # Load model with proper memory management
-    print("Loading model with 4-bit quantization...")
+    logging.info("Loading model with 4-bit quantization...")
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         quantization_config=quantization_config,
@@ -60,9 +122,11 @@ def main():
     )
     
     # Prepare model for training
+    logging.info("Preparing model for training...")
     model = prepare_model_for_kbit_training(model)
     
     # Define LoRA configuration
+    logging.info("Configuring LoRA...")
     lora_config = LoraConfig(
         r=16,  # rank
         lora_alpha=32,
@@ -76,7 +140,7 @@ def main():
     model = get_peft_model(model, lora_config)
     
     # Load datasets
-    print("Loading datasets...")
+    logging.info("Loading datasets...")
     train_dataset = load_dataset("train")
     val_dataset = load_dataset("val")
     
@@ -85,18 +149,21 @@ def main():
     val_dataset = val_dataset.map(format_prompt)
     
     # Tokenize datasets
+    logging.info("Tokenizing dataset...")
     def tokenize_function(examples):
         return tokenizer(
             examples["text"],
             padding="max_length",
             truncation=True,
-            max_length=512
+            max_length=512,
+            return_tensors="pt"
         )
     
     train_dataset = train_dataset.map(tokenize_function, batched=True)
     val_dataset = val_dataset.map(tokenize_function, batched=True)
     
     # Training arguments
+    logging.info("Setting up training arguments...")
     training_args = TrainingArguments(
         output_dir="results",
         num_train_epochs=3,
@@ -116,25 +183,31 @@ def main():
     )
     
     # Initialize trainer
+    logging.info("Initializing trainer...")
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
-        data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=False)
+        data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=False),
+        callbacks=[MetricsCallback(writer)]
     )
     
     # Train model
-    print("Starting training...")
+    logging.info("Starting training...")
     trainer.train()
     
     # Save the final model
-    print("Saving model...")
+    logging.info("Saving model...")
     trainer.save_model("results/final_model")
     
     # Save the LoRA adapter
-    print("Saving LoRA adapter...")
+    logging.info("Saving LoRA adapter...")
     model.save_pretrained("results/lora_adapter")
+    
+    # Close TensorBoard writer
+    writer.close()
+    logging.info("Training completed successfully")
 
 if __name__ == "__main__":
     main() 
