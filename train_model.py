@@ -98,6 +98,10 @@ class MetricsCallback:
         """Called when a training step ends."""
         pass
     
+    def on_substep_end(self, args, state, control, **kwargs):
+        """Called when a substep ends."""
+        pass
+    
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
         """Called after evaluation."""
         if metrics:
