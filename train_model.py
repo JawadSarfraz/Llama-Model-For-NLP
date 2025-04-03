@@ -102,6 +102,10 @@ class MetricsCallback:
         """Called when a substep ends."""
         pass
     
+    def on_pre_optimizer_step(self, args, state, control, **kwargs):
+        """Called before the optimizer step."""
+        pass
+    
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
         """Called after evaluation."""
         if metrics:
