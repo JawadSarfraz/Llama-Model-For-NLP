@@ -15,6 +15,7 @@ This project implements a multi-label classification system for research papers 
 │   ├── prepare_training_data.py  # Data preparation script
 │   └── get_frequent_subjects.py  # Subject analysis script
 ├── train_model.py          # Model training script
+├── check_llama.py          # Script to check LLaMA installation
 ├── requirements.txt        # Project dependencies
 └── README.md              # This file
 ```
@@ -32,8 +33,8 @@ The dataset consists of research papers with their abstracts and subjects. Key s
 The project uses the following setup for training:
 
 ### Base Model
-- Model: LLaMA-7B
-- Precision: 4-bit quantization
+- Model: LLaMA-7B (huggyllama/llama-7b)
+- Precision: 4-bit quantization with double quantization
 - Framework: Hugging Face Transformers
 
 ### Fine-tuning Method
@@ -46,7 +47,7 @@ The project uses the following setup for training:
 
 ### Training Parameters
 - Epochs: 3
-- Batch Size: 4
+- Batch Size: 2 (with gradient accumulation of 4 steps)
 - Max Sequence Length: 512
 - Learning Rate: Default from Trainer
 - Weight Decay: 0.01
@@ -65,6 +66,11 @@ source modelenv/bin/activate
 pip3 install -r requirements.txt
 ```
 
+3. Check LLaMA installation:
+```bash
+python3 check_llama.py
+```
+
 ## Usage
 
 1. Prepare the dataset:
@@ -78,7 +84,7 @@ python3 train_model.py
 ```
 
 The training process will:
-- Download the LLaMA-7B model
+- Load the LLaMA-7B model with 4-bit quantization
 - Apply LoRA configuration
 - Train on the prepared dataset
 - Save checkpoints every 100 steps
