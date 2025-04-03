@@ -56,9 +56,7 @@ def main():
         model_name,
         quantization_config=quantization_config,
         device_map="auto",
-        torch_dtype=torch.float16,
-        # Enable CPU offloading if needed
-        llm_int8_enable_fp32_cpu_offload=True
+        torch_dtype=torch.float16
     )
     
     # Prepare model for training
