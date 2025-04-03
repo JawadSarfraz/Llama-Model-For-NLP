@@ -1,30 +1,58 @@
-# LLaMA-7B Multi-Label Classification
+# Research Paper Subject Classification
 
-This project implements a multi-label classification system using the LLaMA-7B model for scientific paper classification. The system is designed to classify papers into multiple subject categories based on their abstracts.
+This project implements a multi-label classification system for research papers using the Mistral-7B language model. The system is designed to classify research paper abstracts into relevant subjects.
 
 ## Project Structure
 
 ```
 .
-├── configs/
-│   └── config.yaml         # Configuration file
 ├── data/
-│   └── processed/         # Processed datasets
-├── src/
-│   ├── data/
-│   │   └── data_loader.py # Data loading and preprocessing
-│   ├── model/
-│   │   └── model.py       # Model architecture with PEFT
-│   └── train_model.py     # Training script
-├── tests/
-│   └── test_data_loader.py # Data loader tests
-├── .env                   # Environment variables (HF_TOKEN)
-├── .gitignore            # Git ignore rules
-├── requirements.txt      # Python dependencies
-└── README.md            # This file
+│   ├── processed/           # Processed datasets
+│   │   ├── train.json      # Training data
+│   │   ├── val.json        # Validation data
+│   │   └── test.json       # Test data
+│   ├── sample_data.json    # Raw dataset
+│   ├── prepare_training_data.py  # Data preparation script
+│   └── get_frequent_subjects.py  # Subject analysis script
+├── train_model.py          # Model training script
+├── requirements.txt        # Project dependencies
+└── README.md              # This file
 ```
 
-## Setup
+## Dataset
+
+The dataset consists of research papers with their abstracts and subjects. Key statistics:
+- Total papers: 5,000
+- Average subjects per paper: 9.19
+- Unique subjects: 3,983
+- Frequent subjects (20+ papers): 345
+
+## Model Training
+
+The project uses the following setup for training:
+
+### Base Model
+- Model: Mistral-7B-v0.1
+- Precision: 4-bit quantization
+- Framework: Hugging Face Transformers
+
+### Fine-tuning Method
+- Technique: PEFT/LoRA (Parameter-Efficient Fine-Tuning)
+- LoRA Configuration:
+  - Rank: 16
+  - Alpha: 32
+  - Target Modules: q_proj, v_proj
+  - Dropout: 0.05
+
+### Training Parameters
+- Epochs: 3
+- Batch Size: 4
+- Max Sequence Length: 512
+- Learning Rate: Default from Trainer
+- Weight Decay: 0.01
+- Warmup Steps: 100
+
+## Setup and Installation
 
 1. Create and activate virtual environment:
 ```bash
@@ -34,15 +62,34 @@ source modelenv/bin/activate
 
 2. Install dependencies:
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
-3. Configure Hugging Face token:
-- Create a `.env` file in the project root
-- Add your Hugging Face token:
+## Usage
+
+1. Prepare the dataset:
+```bash
+python3 data/prepare_training_data.py
 ```
-HF_TOKEN=your_token_here
+
+2. Start training:
+```bash
+python3 train_model.py
 ```
+
+The training process will:
+- Download the Mistral-7B model
+- Apply LoRA configuration
+- Train on the prepared dataset
+- Save checkpoints every 100 steps
+- Save the final model and LoRA adapter in the `results` directory
+
+## Results
+
+Training results and model checkpoints are saved in the `results` directory:
+- `results/final_model`: The complete fine-tuned model
+- `results/lora_adapter`: The LoRA adapter weights
+- `logs`: Training logs for TensorBoard visualization
 
 ## Model Architecture
 
