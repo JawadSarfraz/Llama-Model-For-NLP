@@ -5,7 +5,8 @@ from transformers import (
     AutoTokenizer,
     TrainingArguments,
     Trainer,
-    DataCollatorForLanguageModeling
+    DataCollatorForLanguageModeling,
+    BitsAndBytesConfig
 )
 from peft import (
     prepare_model_for_kbit_training,
@@ -35,18 +36,29 @@ def format_prompt(example: Dict) -> Dict:
 def main():
     # Load model and tokenizer
     print("Loading model and tokenizer...")
-    model_name = "meta-llama/Llama-2-7b-hf"  # Using LLaMA-7B which is already installed
+    model_name = "huggyllama/llama-7b"  # Using the open source version
     
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     tokenizer.pad_token = tokenizer.eos_token
     
-    # Load model in 4-bit precision
+    # Configure quantization
+    quantization_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_compute_dtype=torch.float16,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_use_double_quant=True,
+    )
+    
+    # Load model with proper memory management
+    print("Loading model with 4-bit quantization...")
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        load_in_4bit=True,
+        quantization_config=quantization_config,
         device_map="auto",
-        torch_dtype=torch.float16
+        torch_dtype=torch.float16,
+        # Enable CPU offloading if needed
+        llm_int8_enable_fp32_cpu_offload=True
     )
     
     # Prepare model for training
@@ -90,8 +102,9 @@ def main():
     training_args = TrainingArguments(
         output_dir="results",
         num_train_epochs=3,
-        per_device_train_batch_size=4,
-        per_device_eval_batch_size=4,
+        per_device_train_batch_size=2,  # Reduced batch size for memory constraints
+        per_device_eval_batch_size=2,
+        gradient_accumulation_steps=4,  # Added gradient accumulation
         warmup_steps=100,
         weight_decay=0.01,
         logging_dir="logs",
