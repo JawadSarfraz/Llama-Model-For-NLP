@@ -99,22 +99,26 @@ def load_model_and_tokenizer():
 def classify_abstract(model, tokenizer, abstract):
     """Classify an abstract into subjects using the base model."""
     # Create a prompt that asks for subject classification
-    prompt = f"""Please analyze the following research abstract and list all relevant subject areas or fields of study. 
-Format your response as a comma-separated list of subjects.
+    prompt = f"""Task: Analyze the following research abstract and list ONLY the main subject areas or fields of study.
+Rules:
+1. List ONLY subject areas, separated by commas
+2. Be specific but concise
+3. Do not include explanations or descriptions
+4. Do not generate new text
 
 Abstract: {abstract}
 
-Subjects:"""
+Subjects (comma-separated list):"""
     
     # Tokenize the prompt
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
     
-    # Generate response
+    # Generate response with lower temperature for more focused output
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_length=512,
-            temperature=0.7,
+            max_length=100,  # Shorter length since we only want subjects
+            temperature=0.3,  # Lower temperature for more focused output
             top_p=0.9,
             do_sample=True,
             pad_token_id=tokenizer.eos_token_id
@@ -122,8 +126,8 @@ Subjects:"""
     
     # Decode and extract subjects
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    # Extract everything after "Subjects:"
-    subjects = response.split("Subjects:")[-1].strip()
+    # Extract everything after "Subjects (comma-separated list):"
+    subjects = response.split("Subjects (comma-separated list):")[-1].strip()
     
     return subjects
 
