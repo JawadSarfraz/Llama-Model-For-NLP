@@ -117,7 +117,7 @@ Subjects (comma-separated list):"""
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_length=100,  # Shorter length since we only want subjects
+            max_new_tokens=50,  # Generate up to 50 new tokens
             temperature=0.3,  # Lower temperature for more focused output
             top_p=0.9,
             do_sample=True,
