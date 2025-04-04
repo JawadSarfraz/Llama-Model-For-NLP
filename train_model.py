@@ -136,6 +136,14 @@ class MetricsCallback:
             if state.global_step % 100 == 0:
                 with open('logs/metrics_history.json', 'w') as f:
                     json.dump(self.metrics_history, f)
+    
+    def on_save(self, args, state, control, **kwargs):
+        """Called when a checkpoint is saved."""
+        pass
+    
+    def on_prediction_step(self, args, state, control, **kwargs):
+        """Called when a prediction step is performed."""
+        pass
 
 def main():
     # Set up logging
