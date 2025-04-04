@@ -3,10 +3,17 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import logging
 import os
 from datetime import datetime
+import huggingface_hub
 
 # Set cache directory to local workspace
-os.environ['TRANSFORMERS_CACHE'] = os.path.join(os.getcwd(), 'model_cache')
-os.environ['HF_HOME'] = os.path.join(os.getcwd(), 'model_cache')
+CACHE_DIR = os.path.join(os.getcwd(), 'model_cache')
+MODEL_DIR = os.path.join(CACHE_DIR, 'gpt2')
+os.makedirs(CACHE_DIR, exist_ok=True)
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+# Configure Hugging Face to use local cache
+os.environ['TRANSFORMERS_CACHE'] = CACHE_DIR
+os.environ['HF_HOME'] = CACHE_DIR
 
 def setup_logging():
     """Configure logging with timestamp and level."""
@@ -24,16 +31,63 @@ def setup_logging():
         ]
     )
 
+def download_model_files():
+    """Download model files manually to local directory."""
+    logging.info("Downloading model files...")
+    try:
+        # Download tokenizer files
+        huggingface_hub.hf_hub_download(
+            repo_id="gpt2",
+            filename="tokenizer.json",
+            local_dir=MODEL_DIR,
+            local_dir_use_symlinks=False
+        )
+        huggingface_hub.hf_hub_download(
+            repo_id="gpt2",
+            filename="vocab.json",
+            local_dir=MODEL_DIR,
+            local_dir_use_symlinks=False
+        )
+        huggingface_hub.hf_hub_download(
+            repo_id="gpt2",
+            filename="merges.txt",
+            local_dir=MODEL_DIR,
+            local_dir_use_symlinks=False
+        )
+        
+        # Download model files
+        huggingface_hub.hf_hub_download(
+            repo_id="gpt2",
+            filename="pytorch_model.bin",
+            local_dir=MODEL_DIR,
+            local_dir_use_symlinks=False
+        )
+        huggingface_hub.hf_hub_download(
+            repo_id="gpt2",
+            filename="config.json",
+            local_dir=MODEL_DIR,
+            local_dir_use_symlinks=False
+        )
+        
+        logging.info("Model files downloaded successfully")
+    except Exception as e:
+        logging.error(f"Error downloading model files: {e}")
+        raise
+
 def load_model_and_tokenizer():
     """Load the base model and tokenizer."""
     logging.info("Loading base model and tokenizer...")
     
-    # Load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    # Download model files if not already present
+    if not os.path.exists(os.path.join(MODEL_DIR, "pytorch_model.bin")):
+        download_model_files()
     
-    # Load model with 4-bit quantization for memory efficiency
+    # Load tokenizer from local directory
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+    
+    # Load model from local directory with 4-bit quantization
     model = AutoModelForCausalLM.from_pretrained(
-        "gpt2",
+        MODEL_DIR,
         load_in_4bit=True,
         device_map="auto",
         torch_dtype=torch.float16
