@@ -56,8 +56,18 @@ def classify_abstract(abstract: str, model, tokenizer, label_encoder) -> list:
     Returns:
         List of predicted subjects
     """
-    # Format input
-    prompt = f"Classify this research abstract into subjects:\n\n{abstract}"
+    # Format input with explicit instructions
+    prompt = f"""Please classify this research abstract into subjects from the following list:
+{', '.join(label_encoder.classes_)}
+
+Abstract:
+{abstract}
+
+Please respond with ONLY a line starting with "Subjects:" followed by a comma-separated list of subjects from the above list. For example:
+Subjects: Employment, Labor Market, Housing Market
+
+Your classification:"""
+    
     logging.info(f"Input prompt:\n{prompt}")
     
     # Tokenize input
@@ -72,7 +82,10 @@ def classify_abstract(abstract: str, model, tokenizer, label_encoder) -> list:
             num_return_sequences=1,
             temperature=0.7,
             do_sample=True,
-            pad_token_id=tokenizer.pad_token_id
+            pad_token_id=tokenizer.pad_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+            min_length=50,  # Ensure we get enough output
+            max_new_tokens=100  # Limit the output length
         )
     
     # Decode prediction
@@ -85,6 +98,8 @@ def classify_abstract(abstract: str, model, tokenizer, label_encoder) -> list:
         subjects_line = [line for line in prediction.split('\n') if line.startswith('Subjects:')][0]
         # Extract subjects and split by comma
         subjects = [s.strip() for s in subjects_line.replace('Subjects:', '').split(',')]
+        # Filter out empty strings and validate against available subjects
+        subjects = [s for s in subjects if s and s in label_encoder.classes_]
         logging.info(f"Extracted subjects: {subjects}")
         return subjects
     except Exception as e:
@@ -99,6 +114,8 @@ def classify_abstract(abstract: str, model, tokenizer, label_encoder) -> list:
                 # Extract everything after "subjects:" or "Subjects:"
                 subjects_text = subjects_line.split(':', 1)[1].strip()
                 subjects = [s.strip() for s in subjects_text.split(',')]
+                # Filter out empty strings and validate against available subjects
+                subjects = [s for s in subjects if s and s in label_encoder.classes_]
                 logging.info(f"Extracted subjects (alternative method): {subjects}")
                 return subjects
         except Exception as e2:
