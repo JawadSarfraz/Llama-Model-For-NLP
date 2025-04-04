@@ -25,11 +25,11 @@ def load_model_and_tokenizer():
     logging.info("Loading base model and tokenizer...")
     
     # Load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("facebook/opt-1.3b")
+    tokenizer = AutoTokenizer.from_pretrained("gpt2")
     
     # Load model with 4-bit quantization for memory efficiency
     model = AutoModelForCausalLM.from_pretrained(
-        "facebook/opt-1.3b",
+        "gpt2",
         load_in_4bit=True,
         device_map="auto",
         torch_dtype=torch.float16
