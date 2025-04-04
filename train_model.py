@@ -137,16 +137,6 @@ class MetricsCallback:
                 with open('logs/metrics_history.json', 'w') as f:
                     json.dump(self.metrics_history, f)
 
-def tokenize_function(examples):
-    """Tokenize the input text."""
-    return tokenizer(
-        examples["input"],  # Changed from "text" to "input"
-        padding="max_length",
-        truncation=True,
-        max_length=512,
-        return_tensors="pt"
-    )
-
 def main():
     # Set up logging
     writer = setup_logging()
@@ -214,6 +204,16 @@ def main():
         
         # Tokenize datasets
         logging.info("Tokenizing dataset...")
+        def tokenize_function(examples):
+            """Tokenize the input text."""
+            return tokenizer(
+                examples["input"],
+                padding="max_length",
+                truncation=True,
+                max_length=512,
+                return_tensors="pt"
+            )
+        
         tokenized_train = train_dataset.map(
             tokenize_function,
             batched=True,
