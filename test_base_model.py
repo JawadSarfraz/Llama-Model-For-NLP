@@ -7,7 +7,8 @@ import huggingface_hub
 
 # Set cache directory to local workspace
 CACHE_DIR = os.path.join(os.getcwd(), 'model_cache')
-MODEL_DIR = os.path.join(CACHE_DIR, 'mistral-7b')
+MODEL_DIR = "mistral-7b-instruct"
+MODEL_REPO = "mistralai/Mistral-7B-Instruct-v0.2"
 os.makedirs(CACHE_DIR, exist_ok=True)
 os.makedirs(MODEL_DIR, exist_ok=True)
 
@@ -37,19 +38,19 @@ def download_model_files():
     try:
         # Download tokenizer files
         huggingface_hub.hf_hub_download(
-            repo_id="mistralai/Mistral-7B-v0.1",
+            repo_id=MODEL_REPO,
             filename="tokenizer.json",
             local_dir=MODEL_DIR,
             local_dir_use_symlinks=False
         )
         huggingface_hub.hf_hub_download(
-            repo_id="mistralai/Mistral-7B-v0.1",
+            repo_id=MODEL_REPO,
             filename="tokenizer_config.json",
             local_dir=MODEL_DIR,
             local_dir_use_symlinks=False
         )
         huggingface_hub.hf_hub_download(
-            repo_id="mistralai/Mistral-7B-v0.1",
+            repo_id=MODEL_REPO,
             filename="special_tokens_map.json",
             local_dir=MODEL_DIR,
             local_dir_use_symlinks=False
@@ -58,14 +59,14 @@ def download_model_files():
         # Download model files (sharded)
         for i in range(1, 5):  # Assuming 4 shards
             huggingface_hub.hf_hub_download(
-                repo_id="mistralai/Mistral-7B-v0.1",
+                repo_id=MODEL_REPO,
                 filename=f"model-{i:05d}-of-00004.safetensors",
                 local_dir=MODEL_DIR,
                 local_dir_use_symlinks=False
             )
         
         huggingface_hub.hf_hub_download(
-            repo_id="mistralai/Mistral-7B-v0.1",
+            repo_id=MODEL_REPO,
             filename="config.json",
             local_dir=MODEL_DIR,
             local_dir_use_symlinks=False
