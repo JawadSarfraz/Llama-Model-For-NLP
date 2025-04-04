@@ -4,6 +4,10 @@ import logging
 import os
 from datetime import datetime
 
+# Set cache directory to local workspace
+os.environ['TRANSFORMERS_CACHE'] = os.path.join(os.getcwd(), 'model_cache')
+os.environ['HF_HOME'] = os.path.join(os.getcwd(), 'model_cache')
+
 def setup_logging():
     """Configure logging with timestamp and level."""
     log_dir = "logs"
