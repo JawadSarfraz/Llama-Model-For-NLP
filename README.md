@@ -214,17 +214,23 @@ The model shows moderate performance in:
 - Base model testing capabilities
 
 ## Base Model Testing
-Before fine-tuning, you can test the base Llama 7B model's classification capabilities:
+Before fine-tuning, you can test the base model's classification capabilities:
 ```bash
 python3 test_base_model.py
 ```
 This will:
-- Load the base Llama 7B model
+- Load a base language model (currently GPT-2 for testing)
 - Test classification on a sample abstract
 - Log results in the `logs` directory
 - Use 4-bit quantization for memory efficiency
 
 The base model test helps establish a performance baseline before fine-tuning.
+
+### Future Improvements
+- Replace GPT-2 with a more advanced model (Llama 7B, Mistral, etc.)
+- Implement proper authentication for accessing gated models
+- Optimize memory usage for larger models
+- Add support for batch processing of abstracts
 
 ## Usage
 
