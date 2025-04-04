@@ -58,6 +58,7 @@ def classify_abstract(abstract: str, model, tokenizer, label_encoder) -> list:
     """
     # Format input
     prompt = f"Classify this research abstract into subjects:\n\n{abstract}"
+    logging.info(f"Input prompt:\n{prompt}")
     
     # Tokenize input
     inputs = tokenizer(prompt, return_tensors="pt", padding=True, truncation=True, max_length=512)
@@ -76,6 +77,7 @@ def classify_abstract(abstract: str, model, tokenizer, label_encoder) -> list:
     
     # Decode prediction
     prediction = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    logging.info(f"Raw model output:\n{prediction}")
     
     # Extract subjects from prediction
     try:
@@ -83,9 +85,24 @@ def classify_abstract(abstract: str, model, tokenizer, label_encoder) -> list:
         subjects_line = [line for line in prediction.split('\n') if line.startswith('Subjects:')][0]
         # Extract subjects and split by comma
         subjects = [s.strip() for s in subjects_line.replace('Subjects:', '').split(',')]
+        logging.info(f"Extracted subjects: {subjects}")
         return subjects
-    except:
-        logging.warning("Could not extract subjects from prediction")
+    except Exception as e:
+        logging.warning(f"Could not extract subjects from prediction: {str(e)}")
+        # Try alternative extraction
+        try:
+            # Look for any line containing "subjects" (case insensitive)
+            subjects_lines = [line for line in prediction.split('\n') 
+                            if 'subjects' in line.lower()]
+            if subjects_lines:
+                subjects_line = subjects_lines[0]
+                # Extract everything after "subjects:" or "Subjects:"
+                subjects_text = subjects_line.split(':', 1)[1].strip()
+                subjects = [s.strip() for s in subjects_text.split(',')]
+                logging.info(f"Extracted subjects (alternative method): {subjects}")
+                return subjects
+        except Exception as e2:
+            logging.warning(f"Alternative extraction also failed: {str(e2)}")
         return []
 
 def main():
@@ -99,6 +116,7 @@ def main():
         
         # Load label encoder
         label_encoder = joblib.load('results/final_model/label_encoder.joblib')
+        logger.info(f"Available subjects: {label_encoder.classes_}")
         
         # Example abstract
         abstract = """
@@ -113,9 +131,12 @@ def main():
         subjects = classify_abstract(abstract, model, tokenizer, label_encoder)
         
         # Print results
-        logger.info("Predicted subjects:")
-        for subject in subjects:
-            logger.info(f"- {subject}")
+        if subjects:
+            logger.info("Predicted subjects:")
+            for subject in subjects:
+                logger.info(f"- {subject}")
+        else:
+            logger.warning("No subjects were predicted")
         
     except Exception as e:
         logger.error(f"An error occurred: {str(e)}")
