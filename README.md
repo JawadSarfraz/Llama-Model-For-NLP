@@ -204,6 +204,27 @@ The model shows moderate performance in:
 - Comprehensive test suite for all components
 - Three-way data splitting with configurable ratios
 - Automated testing of data processing pipeline
+- Multi-label subject classification
+- Efficient fine-tuning with LoRA
+- Comprehensive logging system
+- GPU memory monitoring
+- Automatic checkpoint saving
+- Progress tracking with tqdm
+- Detailed performance metrics
+- Base model testing capabilities
+
+## Base Model Testing
+Before fine-tuning, you can test the base Llama 7B model's classification capabilities:
+```bash
+python3 test_base_model.py
+```
+This will:
+- Load the base Llama 7B model
+- Test classification on a sample abstract
+- Log results in the `logs` directory
+- Use 4-bit quantization for memory efficiency
+
+The base model test helps establish a performance baseline before fine-tuning.
 
 ## Usage
 
