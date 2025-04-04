@@ -142,119 +142,139 @@ def main():
     writer = setup_logging()
     logging.info("Starting training process")
     
-    # Load model and tokenizer
-    logging.info("Loading model and tokenizer...")
-    model_name = "huggyllama/llama-7b"  # Using the open source version
-    
-    # Load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    tokenizer.pad_token = tokenizer.eos_token
-    
-    # Configure quantization
-    logging.info("Configuring model quantization...")
-    quantization_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_compute_dtype=torch.float16,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_use_double_quant=True,
-    )
-    
-    # Load model with proper memory management
-    logging.info("Loading model with 4-bit quantization...")
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        quantization_config=quantization_config,
-        device_map="auto",
-        torch_dtype=torch.float16
-    )
-    
-    # Prepare model for training
-    logging.info("Preparing model for training...")
-    model = prepare_model_for_kbit_training(model)
-    
-    # Define LoRA configuration
-    logging.info("Configuring LoRA...")
-    lora_config = LoraConfig(
-        r=16,  # rank
-        lora_alpha=32,
-        target_modules=["q_proj", "v_proj"],  # Which modules to apply LoRA to
-        lora_dropout=0.05,
-        bias="none",
-        task_type=TaskType.CAUSAL_LM
-    )
-    
-    # Get PEFT model
-    model = get_peft_model(model, lora_config)
-    
-    # Load datasets
-    logging.info("Loading datasets...")
-    train_dataset = load_dataset("train")
-    val_dataset = load_dataset("val")
-    
-    # Format datasets
-    train_dataset = train_dataset.map(format_prompt)
-    val_dataset = val_dataset.map(format_prompt)
-    
-    # Tokenize datasets
-    logging.info("Tokenizing dataset...")
-    def tokenize_function(examples):
-        return tokenizer(
-            examples["text"],
-            padding="max_length",
-            truncation=True,
-            max_length=512,
-            return_tensors="pt"
+    try:
+        # Check GPU memory
+        logging.info("Checking GPU memory...")
+        import torch
+        for i in range(torch.cuda.device_count()):
+            logging.info(f"GPU {i}: {torch.cuda.get_device_name(i)}")
+            logging.info(f"Memory allocated: {torch.cuda.memory_allocated(i) / 1024**2:.2f} MB")
+            logging.info(f"Memory cached: {torch.cuda.memory_reserved(i) / 1024**2:.2f} MB")
+        
+        # Load model and tokenizer
+        logging.info("Loading model and tokenizer...")
+        model_name = "huggyllama/llama-7b"
+        
+        # Configure quantization
+        logging.info("Configuring model quantization...")
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
         )
-    
-    train_dataset = train_dataset.map(tokenize_function, batched=True)
-    val_dataset = val_dataset.map(tokenize_function, batched=True)
-    
-    # Training arguments
-    logging.info("Setting up training arguments...")
-    training_args = TrainingArguments(
-        output_dir="results",
-        num_train_epochs=3,
-        per_device_train_batch_size=2,  # Reduced batch size for memory constraints
-        per_device_eval_batch_size=2,
-        gradient_accumulation_steps=4,  # Added gradient accumulation
-        warmup_steps=100,
-        weight_decay=0.01,
-        logging_dir="logs",
-        logging_steps=10,
-        evaluation_strategy="steps",
-        eval_steps=100,
-        save_strategy="steps",
-        save_steps=100,
-        load_best_model_at_end=True,
-        report_to="tensorboard"
-    )
-    
-    # Initialize trainer
-    logging.info("Initializing trainer...")
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=val_dataset,
-        data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=False),
-        callbacks=[MetricsCallback(writer)]
-    )
-    
-    # Train model
-    logging.info("Starting training...")
-    trainer.train()
-    
-    # Save the final model
-    logging.info("Saving model...")
-    trainer.save_model("results/final_model")
-    
-    # Save the LoRA adapter
-    logging.info("Saving LoRA adapter...")
-    model.save_pretrained("results/lora_adapter")
-    
-    # Close TensorBoard writer
-    writer.close()
-    logging.info("Training completed successfully")
+        
+        # Load tokenizer
+        logging.info("Loading tokenizer...")
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        tokenizer.pad_token = tokenizer.eos_token
+        
+        # Load model with quantization
+        logging.info("Loading model with 4-bit quantization...")
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            quantization_config=bnb_config,
+            device_map="auto",
+            torch_dtype=torch.float16
+        )
+        
+        # Prepare model for training
+        logging.info("Preparing model for training...")
+        model = prepare_model_for_kbit_training(model)
+        
+        # Configure LoRA
+        logging.info("Configuring LoRA...")
+        lora_config = LoraConfig(
+            r=16,
+            lora_alpha=32,
+            target_modules=["q_proj", "v_proj"],
+            lora_dropout=0.05,
+            bias="none",
+            task_type=TaskType.CAUSAL_LM
+        )
+        
+        # Get PEFT model
+        logging.info("Getting PEFT model...")
+        model = get_peft_model(model, lora_config)
+        
+        # Load datasets
+        logging.info("Loading datasets...")
+        train_dataset = load_dataset("train")
+        val_dataset = load_dataset("val")
+        
+        # Tokenize datasets
+        logging.info("Tokenizing dataset...")
+        def tokenize_function(examples):
+            return tokenizer(
+                examples["text"],
+                padding="max_length",
+                truncation=True,
+                max_length=512,
+                return_tensors="pt"
+            )
+        
+        tokenized_train = train_dataset.map(
+            tokenize_function,
+            batched=True,
+            remove_columns=train_dataset.column_names
+        )
+        
+        tokenized_val = val_dataset.map(
+            tokenize_function,
+            batched=True,
+            remove_columns=val_dataset.column_names
+        )
+        
+        # Training arguments
+        logging.info("Setting up training arguments...")
+        training_args = TrainingArguments(
+            output_dir="results",
+            num_train_epochs=3,
+            per_device_train_batch_size=2,
+            per_device_eval_batch_size=2,
+            gradient_accumulation_steps=4,
+            evaluation_strategy="steps",
+            eval_steps=100,
+            save_strategy="steps",
+            save_steps=100,
+            learning_rate=2e-4,
+            weight_decay=0.01,
+            fp16=True,
+            logging_steps=10,
+            report_to="tensorboard"
+        )
+        
+        # Initialize trainer
+        logging.info("Initializing trainer...")
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            train_dataset=tokenized_train,
+            eval_dataset=tokenized_val,
+            data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=False),
+            callbacks=[MetricsCallback(writer)]
+        )
+        
+        # Train model
+        logging.info("Starting training...")
+        trainer.train()
+        
+        # Save the final model
+        logging.info("Saving model...")
+        trainer.save_model("results/final_model")
+        
+        # Save the LoRA adapter
+        logging.info("Saving LoRA adapter...")
+        model.save_pretrained("results/lora_adapter")
+        
+        # Close TensorBoard writer
+        writer.close()
+        logging.info("Training completed successfully")
+        
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+        logging.error("Traceback:", exc_info=True)
+        raise
 
 if __name__ == "__main__":
     main() 
