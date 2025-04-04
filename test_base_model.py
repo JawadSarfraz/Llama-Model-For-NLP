@@ -98,17 +98,21 @@ def load_model_and_tokenizer():
 
 def classify_abstract(model, tokenizer, abstract):
     """Classify an abstract into subjects using the base model."""
-    # Create a prompt that asks for subject classification
+    # Create a prompt that asks for subject classification with examples
     prompt = f"""Task: Analyze the following research abstract and list ONLY the main subject areas or fields of study.
-Rules:
-1. List ONLY subject areas, separated by commas
-2. Be specific but concise
-3. Do not include explanations or descriptions
-4. Do not generate new text
 
-Abstract: {abstract}
+Example 1:
+Abstract: A deep learning approach to natural language processing with attention mechanisms.
+Subjects: Computer Science, Artificial Intelligence, Natural Language Processing, Machine Learning
 
-Subjects (comma-separated list):"""
+Example 2:
+Abstract: Novel techniques in quantum computing for solving optimization problems.
+Subjects: Physics, Quantum Computing, Computer Science, Mathematics
+
+Now analyze this abstract:
+{abstract}
+
+Subjects (list only the fields, separated by commas):"""
     
     # Tokenize the prompt
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
@@ -126,8 +130,8 @@ Subjects (comma-separated list):"""
     
     # Decode and extract subjects
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    # Extract everything after "Subjects (comma-separated list):"
-    subjects = response.split("Subjects (comma-separated list):")[-1].strip()
+    # Extract everything after "Subjects (list only the fields, separated by commas):"
+    subjects = response.split("Subjects (list only the fields, separated by commas):")[-1].strip()
     
     return subjects
 
