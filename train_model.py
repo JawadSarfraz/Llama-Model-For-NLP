@@ -168,19 +168,23 @@ def main():
         logging.info("Loading tokenizer...")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         tokenizer.pad_token = tokenizer.eos_token
+        logging.info("Tokenizer loaded successfully")
         
         # Load model with quantization
         logging.info("Loading model with 4-bit quantization...")
+        logging.info("This may take a few minutes...")
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
             quantization_config=bnb_config,
             device_map="auto",
             torch_dtype=torch.float16
         )
+        logging.info("Model loaded successfully")
         
         # Prepare model for training
         logging.info("Preparing model for training...")
         model = prepare_model_for_kbit_training(model)
+        logging.info("Model prepared for training")
         
         # Configure LoRA
         logging.info("Configuring LoRA...")
@@ -196,11 +200,14 @@ def main():
         # Get PEFT model
         logging.info("Getting PEFT model...")
         model = get_peft_model(model, lora_config)
+        logging.info("PEFT model created successfully")
         
         # Load datasets
         logging.info("Loading datasets...")
         train_dataset = load_dataset("train")
         val_dataset = load_dataset("val")
+        logging.info(f"Train dataset size: {len(train_dataset)}")
+        logging.info(f"Validation dataset size: {len(val_dataset)}")
         
         # Tokenize datasets
         logging.info("Tokenizing dataset...")
@@ -214,17 +221,21 @@ def main():
                 return_tensors="pt"
             )
         
+        logging.info("Tokenizing training dataset...")
         tokenized_train = train_dataset.map(
             tokenize_function,
             batched=True,
             remove_columns=train_dataset.column_names
         )
+        logging.info("Training dataset tokenized")
         
+        logging.info("Tokenizing validation dataset...")
         tokenized_val = val_dataset.map(
             tokenize_function,
             batched=True,
             remove_columns=val_dataset.column_names
         )
+        logging.info("Validation dataset tokenized")
         
         # Training arguments
         logging.info("Setting up training arguments...")
