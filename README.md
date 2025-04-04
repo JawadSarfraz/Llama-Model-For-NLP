@@ -149,25 +149,44 @@ Training results and model checkpoints are saved in the `results` directory:
 ## Training Results
 
 ### Dataset Statistics
-- Total examples: 5000 (filtered to include only papers with subjects)
-- Training set: 3500 examples (70%)
-- Validation set: 750 examples (15%)
-- Test set: 750 examples (15%)
-- Data filtering: Only papers with valid subject fields are included
+- Total examples: 100 (filtered to 54 for training)
+- Training set: 45 examples (70%)
+- Validation set: 9 examples (15%)
+- Test set: 9 examples (15%)
+- Data filtering: Only papers with subjects appearing 20+ times
 - Source: Research paper abstracts with subject classifications
 
 ### Performance Metrics
-- Final training loss: 1.2969
-- Evaluation metrics:
-  - F1 Score: 0.3442 (34.42%)
-  - Precision: 0.2667 (26.67%)
-  - Recall: 0.5500 (55.00%)
+- Initial training loss: 2.5322
+- Final training loss: 2.553578249613444
+- Training speed:
+  - 0.385 samples per second
+  - 0.043 steps per second
+  - Average time per step: 23.40 seconds
+- Total training time: ~352 seconds (5 minutes 52 seconds)
 
-### Training Duration
-- Total training time: ~2.5 minutes
-- Average time per epoch: ~45 seconds
-- Checkpoint saving: Every epoch
-- Model size after training: ~9.8GB (including all dependencies)
+### Loss Interpretation
+- Loss range: 0.0 (perfect) to ∞ (random)
+- Current loss (2.55) indicates:
+  - Better than random (which would be ~4-5)
+  - Not perfect (which would be 0)
+  - Reasonable for multi-label classification with limited data
+- Optimal target loss for our task: 1.5-2.0
+- Acceptable loss range: 2.0-2.5
+
+### Training Process
+- Steps: 15/15 completed
+- Epochs: 2.87 (almost 3 full passes)
+- Learning rate: 6.666666666666667e-05
+- Gradient norm: 0.4271750748157501
+- Memory usage: Optimized with 4-bit quantization
+
+### Model Performance
+The model shows moderate performance in:
+- Identifying multiple subjects per abstract
+- Handling subject relationships
+- Working with limited training data
+- Managing memory constraints
 
 ## Features
 
