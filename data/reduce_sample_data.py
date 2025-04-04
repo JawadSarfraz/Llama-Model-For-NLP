@@ -28,9 +28,9 @@ if __name__ == "__main__":
     # Set random seed for reproducibility
     random.seed(42)
     
-    # Reduce sample data to 500 examples
+    # Reduce sample data to 100 examples
     reduce_sample_data(
         input_file='data/sample_data.json',
-        output_file='data/sample_data_500.json',
-        num_samples=500
+        output_file='data/sample_data_100.json',
+        num_samples=100
     ) 
