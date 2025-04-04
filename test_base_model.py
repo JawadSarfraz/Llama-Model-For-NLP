@@ -133,6 +133,11 @@ Subjects (list only the fields, separated by commas):"""
     # Extract everything after "Subjects (list only the fields, separated by commas):"
     subjects = response.split("Subjects (list only the fields, separated by commas):")[-1].strip()
     
+    # Clean up the output
+    subjects = subjects.split('\n')[0]  # Take only the first line
+    subjects = subjects.split('Example')[0]  # Remove any additional examples
+    subjects = subjects.strip()  # Remove any extra whitespace
+    
     return subjects
 
 def main():
