@@ -76,7 +76,7 @@ def main():
     
     # Load the dataset
     print("Loading dataset...")
-    with open('data/sample_data.json', 'r') as f:
+    with open('data/sample_data_500.json', 'r') as f:
         data = json.load(f)
     
     # Get frequent subjects
