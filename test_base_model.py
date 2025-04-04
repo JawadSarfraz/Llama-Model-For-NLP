@@ -21,15 +21,15 @@ def setup_logging():
     )
 
 def load_model_and_tokenizer():
-    """Load the base Llama 7B model and tokenizer."""
-    logging.info("Loading base Llama 7B model and tokenizer...")
+    """Load the base model and tokenizer."""
+    logging.info("Loading base model and tokenizer...")
     
     # Load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
+    tokenizer = AutoTokenizer.from_pretrained("facebook/opt-1.3b")
     
     # Load model with 4-bit quantization for memory efficiency
     model = AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-2-7b-hf",
+        "facebook/opt-1.3b",
         load_in_4bit=True,
         device_map="auto",
         torch_dtype=torch.float16
