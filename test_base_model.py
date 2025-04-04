@@ -7,7 +7,7 @@ import huggingface_hub
 
 # Set cache directory to local workspace
 CACHE_DIR = os.path.join(os.getcwd(), 'model_cache')
-MODEL_DIR = os.path.join(CACHE_DIR, 'gpt2')
+MODEL_DIR = os.path.join(CACHE_DIR, 'mistral-7b')
 os.makedirs(CACHE_DIR, exist_ok=True)
 os.makedirs(MODEL_DIR, exist_ok=True)
 
@@ -37,33 +37,35 @@ def download_model_files():
     try:
         # Download tokenizer files
         huggingface_hub.hf_hub_download(
-            repo_id="gpt2",
+            repo_id="mistralai/Mistral-7B-v0.1",
             filename="tokenizer.json",
             local_dir=MODEL_DIR,
             local_dir_use_symlinks=False
         )
         huggingface_hub.hf_hub_download(
-            repo_id="gpt2",
-            filename="vocab.json",
+            repo_id="mistralai/Mistral-7B-v0.1",
+            filename="tokenizer_config.json",
             local_dir=MODEL_DIR,
             local_dir_use_symlinks=False
         )
         huggingface_hub.hf_hub_download(
-            repo_id="gpt2",
-            filename="merges.txt",
+            repo_id="mistralai/Mistral-7B-v0.1",
+            filename="special_tokens_map.json",
             local_dir=MODEL_DIR,
             local_dir_use_symlinks=False
         )
         
-        # Download model files
+        # Download model files (sharded)
+        for i in range(1, 5):  # Assuming 4 shards
+            huggingface_hub.hf_hub_download(
+                repo_id="mistralai/Mistral-7B-v0.1",
+                filename=f"model-{i:05d}-of-00004.safetensors",
+                local_dir=MODEL_DIR,
+                local_dir_use_symlinks=False
+            )
+        
         huggingface_hub.hf_hub_download(
-            repo_id="gpt2",
-            filename="pytorch_model.bin",
-            local_dir=MODEL_DIR,
-            local_dir_use_symlinks=False
-        )
-        huggingface_hub.hf_hub_download(
-            repo_id="gpt2",
+            repo_id="mistralai/Mistral-7B-v0.1",
             filename="config.json",
             local_dir=MODEL_DIR,
             local_dir_use_symlinks=False
@@ -79,7 +81,7 @@ def load_model_and_tokenizer():
     logging.info("Loading base model and tokenizer...")
     
     # Download model files if not already present
-    if not os.path.exists(os.path.join(MODEL_DIR, "pytorch_model.bin")):
+    if not os.path.exists(os.path.join(MODEL_DIR, "config.json")):
         download_model_files()
     
     # Load tokenizer from local directory
@@ -147,9 +149,7 @@ def main():
     model, tokenizer = load_model_and_tokenizer()
     
     # Example abstract
-    abstract = """This paper presents a novel approach to machine learning-based image classification using convolutional neural networks. 
-    We demonstrate improved accuracy on the CIFAR-10 dataset through architectural modifications and training techniques. 
-    Our method achieves state-of-the-art results while reducing computational complexity."""
+    abstract = """This paper examines the transition process within Eastern Europe and the integration process with the EU and shows that the requirements for the transition towards a market economy overlap with the requirements for EU accession. Furthermore, the economic situation of the candidate countries is examined and it is pointed out that there is a large gap in the economic development between the Central and Eastern European countries and the EU. The paper argues that the acceding transition countries still have substantial reform tasks ahead of them and that the expanding EU membership requires also considerable reforms within the EU to reduce the danger of standstill for European policy making."""
     
     # Classify the abstract
     logging.info("Classifying abstract...")
