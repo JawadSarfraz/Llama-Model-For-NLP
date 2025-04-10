@@ -410,3 +410,44 @@ python3 test_huggingface_setup.py
 - Transformers
 - PEFT
 - Other dependencies listed in requirements.txt
+
+## Interactive Abstract Classifier
+
+The project now includes an interactive command-line interface for classifying research paper abstracts:
+
+```bash
+python3 abstract_classifier.py
+```
+
+Features:
+- Interactive command-line interface
+- Real-time subject classification
+- Supports multiple abstract inputs
+- Logs all classifications for reference
+- Uses the OPT-125M model for efficient processing
+- Provides clear feedback and results
+
+Usage:
+1. Run the script: `python3 abstract_classifier.py`
+2. Enter your abstract when prompted
+3. View the predicted subjects
+4. Type 'quit' to exit
+
+Example:
+```
+Welcome to the Abstract Subject Classifier!
+Type 'quit' to exit the program.
+
+==================================================
+
+Please enter your abstract (or 'quit' to exit):
+[Your abstract here]
+
+Analyzing abstract...
+
+Results:
+Abstract: [Your abstract]
+Predicted Subjects: [List of subjects]
+```
+
+The classifier uses the same model architecture and classification logic as the main system, but provides a more user-friendly interface for quick testing and analysis.
