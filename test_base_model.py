@@ -7,9 +7,13 @@ import huggingface_hub
 
 # Set cache directory to local workspace
 CACHE_DIR = os.path.join(os.getcwd(), 'model_cache')
-MODEL_DIR = "mistral-7b-instruct"
-MODEL_REPO = "mistralai/Mistral-7B-Instruct-v0.2"
+# MODEL_DIR = "llama-2-7b-chat"
+# MODEL_REPO = "meta-llama/Llama-2-7b-chat-hf"
+
+MODEL_DIR = "opt-125m"
+MODEL_REPO = "facebook/opt-125m"
 os.makedirs(CACHE_DIR, exist_ok=True)
+
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 # Configure Hugging Face to use local cache
