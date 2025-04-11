@@ -463,29 +463,20 @@ This project provides tools for classifying research abstracts into subject area
 - Basic classification capabilities
 - Suitable for quick testing and smaller abstracts
 
-### 2. Mistral-7B Version (`abstract_classifier_mistral.py`)
-- Uses Mistral-7B-Instruct-v0.2 model
-- More powerful classification capabilities
-- Better handling of complex abstracts
-- Supports both German and English terminology
+### 2. BLOOM-560m Version (`abstract_classifier_mistral.py`)
+- Uses BLOOM-560m model
+- More flexible subject identification
+- Dynamic subject classification based on abstract content
+- No predefined subject categories
 - Uses 4-bit quantization for efficient memory usage
 
 ## Features
 
-- Classifies research abstracts into predefined subject areas
-- Maintains both German and English terminology
+- Classifies research abstracts into relevant subject areas
+- Identifies subjects based on abstract content and context
 - Logs classification results with timestamps
 - Interactive command-line interface
 - Caches model files locally for faster subsequent runs
-
-## Subject Areas
-
-The classifier recognizes the following main subject areas:
-- Banking
-- Trade
-- EU Integration
-
-Each area has associated terms in both German and English.
 
 ## Usage
 
@@ -499,12 +490,20 @@ pip install torch transformers bitsandbytes
 # For OPT-125m version
 python3 abstract_classifier.py
 
-# For Mistral-7B version
+# For BLOOM-560m version
 python3 abstract_classifier_mistral.py
 ```
 
 3. Enter your abstract when prompted
 4. Type 'quit' to exit the program
+
+## How It Works
+
+The classifier:
+1. Analyzes the abstract content
+2. Identifies key topics, methodologies, and domains
+3. Generates relevant subject areas based on the content
+4. Provides a list of identified subjects
 
 ## Logging
 
@@ -515,5 +514,5 @@ Classification results are logged to the `logs` directory with timestamps for fu
 - Python 3.8+
 - PyTorch
 - Transformers
-- BitsAndBytes (for Mistral-7B version)
-- Sufficient GPU memory (recommended for Mistral-7B version)
+- BitsAndBytes (for BLOOM-560m version)
+- Sufficient GPU memory (recommended for BLOOM-560m version)
