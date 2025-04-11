@@ -451,3 +451,69 @@ Predicted Subjects: [List of subjects]
 ```
 
 The classifier uses the same model architecture and classification logic as the main system, but provides a more user-friendly interface for quick testing and analysis.
+
+# Abstract Subject Classifier
+
+This project provides tools for classifying research abstracts into subject areas using large language models.
+
+## Versions
+
+### 1. OPT-125m Version (`abstract_classifier.py`)
+- Uses Facebook's OPT-125m model
+- Basic classification capabilities
+- Suitable for quick testing and smaller abstracts
+
+### 2. Mistral-7B Version (`abstract_classifier_mistral.py`)
+- Uses Mistral-7B-Instruct-v0.2 model
+- More powerful classification capabilities
+- Better handling of complex abstracts
+- Supports both German and English terminology
+- Uses 4-bit quantization for efficient memory usage
+
+## Features
+
+- Classifies research abstracts into predefined subject areas
+- Maintains both German and English terminology
+- Logs classification results with timestamps
+- Interactive command-line interface
+- Caches model files locally for faster subsequent runs
+
+## Subject Areas
+
+The classifier recognizes the following main subject areas:
+- Banking
+- Trade
+- EU Integration
+
+Each area has associated terms in both German and English.
+
+## Usage
+
+1. Install required dependencies:
+```bash
+pip install torch transformers bitsandbytes
+```
+
+2. Run the classifier:
+```bash
+# For OPT-125m version
+python3 abstract_classifier.py
+
+# For Mistral-7B version
+python3 abstract_classifier_mistral.py
+```
+
+3. Enter your abstract when prompted
+4. Type 'quit' to exit the program
+
+## Logging
+
+Classification results are logged to the `logs` directory with timestamps for future reference.
+
+## Requirements
+
+- Python 3.8+
+- PyTorch
+- Transformers
+- BitsAndBytes (for Mistral-7B version)
+- Sufficient GPU memory (recommended for Mistral-7B version)
