@@ -7,7 +7,7 @@ import json
 
 # Set cache directory to local workspace
 CACHE_DIR = os.path.join(os.getcwd(), 'model_cache')
-MODEL_NAME = "mistralai/Mistral-7B-v0.1"  # Open access model
+MODEL_NAME = "bigscience/bloom-560m"  # Open access model
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 # Configure Hugging Face to use local cache
@@ -55,7 +55,8 @@ def load_model_and_tokenizer():
         quantization_config=bnb_config,
         device_map="auto",
         torch_dtype=torch.float16,
-        cache_dir=CACHE_DIR
+        cache_dir=CACHE_DIR,
+        trust_remote_code=True
     )
     
     logging.info("Model and tokenizer loaded successfully")
