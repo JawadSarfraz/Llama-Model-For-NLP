@@ -3,7 +3,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import logging
 import os
 from datetime import datetime
-import json
 
 # Set cache directory to local workspace
 CACHE_DIR = os.path.join(os.getcwd(), 'model_cache')
@@ -13,13 +12,6 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 # Configure Hugging Face to use local cache
 os.environ['TRANSFORMERS_CACHE'] = CACHE_DIR
 os.environ['HF_HOME'] = CACHE_DIR
-
-# Subject dictionary based on sample data
-SUBJECT_DICTIONARY = {
-    "Banking": ["Bank", "Internationale Bank", "Vergleich", "Deutschland", "integration of banking markets", "cointegration analysis"],
-    "Trade": ["Aussenwirtschaft", "Prognose", "Deutschland", "Außenhandelselastizität", "Exporte", "Importe", "realer Wechselkurs", "Fehlerkorrekturmodell", "Konjunkturprognose"],
-    "EU Integration": ["Übergangswirtschaft", "EU-Erweiterung", "Systemtransformation", "Osteuropa", "Verfassungsreform", "EU-Staaten", "European integration", "transition economies", "regional integration", "EU enlargement", "acquis communautaire"]
-}
 
 def setup_logging():
     """Configure logging with timestamp and level."""
@@ -63,39 +55,20 @@ def load_model_and_tokenizer():
     return model, tokenizer
 
 def create_prompt(abstract):
-    """Create a prompt with examples from our subject dictionary."""
-    examples = []
-    for category, subjects in SUBJECT_DICTIONARY.items():
-        example = f"""Example ({category}):
-Abstract: {get_example_abstract(category)}
-Subjects: {', '.join(subjects)}"""
-        examples.append(example)
-    
-    examples_text = '\n\n'.join(examples)
-    prompt = f"""Task: Analyze the following research abstract and list ONLY the main subject areas or fields of study.
-Use the exact terms from the following examples, maintaining both German and English terms where applicable.
+    """Create a prompt for subject classification."""
+    prompt = f"""Analyze the following research abstract and identify its main subject areas or fields of study.
+Focus on the key topics, methodologies, and domains discussed in the abstract.
 
-{examples_text}
-
-Now analyze this abstract:
+Abstract:
 {abstract}
 
-Subjects (list only the fields, separated by commas, maintain original terminology):"""
+Based on the content, the main subject areas are:"""
     
     return prompt
 
-def get_example_abstract(category):
-    """Get example abstract for a given category."""
-    examples = {
-        "Banking": "The German banking market is notorious for its low degree of market penetration by foreign financial institutions, suggesting that markets serviced by domestic and foreign banks are segmented.",
-        "Trade": "Sowohl die deutschen Exporte als auch die Importe von Waren und Dienstleistungen weisen im Zeitraum 1974-1999 bezüglich der zugrunde liegenden Aktivitätsvariablen eine langfristige Elastizität von jeweils rund 1,5 auf.",
-        "EU Integration": "This paper examines the transition process within Eastern Europe and the integration process with the EU and shows that the requirements for the transition towards a market economy overlap with the requirements for EU accession."
-    }
-    return examples.get(category, "")
-
 def classify_abstract(model, tokenizer, abstract):
     """Classify an abstract into subjects using the model."""
-    # Create prompt with examples
+    # Create prompt
     prompt = create_prompt(abstract)
     
     # Tokenize the prompt
@@ -106,8 +79,8 @@ def classify_abstract(model, tokenizer, abstract):
         outputs = model.generate(
             **inputs,
             max_new_tokens=200,
-            temperature=0.3,
-            top_p=0.95,
+            temperature=0.7,  # Increased for more diverse outputs
+            top_p=0.9,
             do_sample=True,
             pad_token_id=tokenizer.eos_token_id
         )
@@ -117,10 +90,11 @@ def classify_abstract(model, tokenizer, abstract):
     
     # Extract the subjects from the response
     subjects = []
-    if "Subjects:" in response:
-        subjects_text = response.split("Subjects:")[1].strip()
+    if "Based on the content, the main subject areas are:" in response:
+        subjects_text = response.split("Based on the content, the main subject areas are:")[1].strip()
         # Clean up the response
-        subjects_text = subjects_text.split('\n')[0].split('Example')[0].strip()
+        subjects_text = subjects_text.split('\n')[0].strip()
+        # Split by commas and clean up each subject
         subjects = [s.strip() for s in subjects_text.split(",") if s.strip()]
     
     return subjects
