@@ -7,7 +7,7 @@ import json
 
 # Set cache directory to local workspace
 CACHE_DIR = os.path.join(os.getcwd(), 'model_cache')
-MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.2"  # More powerful model
+MODEL_NAME = "mistralai/Mistral-7B-v0.1"  # Open access model
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 # Configure Hugging Face to use local cache
@@ -65,13 +65,13 @@ def create_prompt(abstract):
     """Create a prompt with examples from our subject dictionary."""
     examples = []
     for category, subjects in SUBJECT_DICTIONARY.items():
-        example = f"""<s>[INST] Example ({category}):
+        example = f"""Example ({category}):
 Abstract: {get_example_abstract(category)}
-Subjects: {', '.join(subjects)} [/INST]"""
+Subjects: {', '.join(subjects)}"""
         examples.append(example)
     
     examples_text = '\n\n'.join(examples)
-    prompt = f"""<s>[INST] Task: Analyze the following research abstract and list ONLY the main subject areas or fields of study.
+    prompt = f"""Task: Analyze the following research abstract and list ONLY the main subject areas or fields of study.
 Use the exact terms from the following examples, maintaining both German and English terms where applicable.
 
 {examples_text}
@@ -79,7 +79,7 @@ Use the exact terms from the following examples, maintaining both German and Eng
 Now analyze this abstract:
 {abstract}
 
-Subjects (list only the fields, separated by commas, maintain original terminology): [/INST]"""
+Subjects (list only the fields, separated by commas, maintain original terminology):"""
     
     return prompt
 
