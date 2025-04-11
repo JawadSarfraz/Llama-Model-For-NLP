@@ -3,6 +3,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import logging
 import os
 from datetime import datetime
+import json
 
 # Set cache directory to local workspace
 CACHE_DIR = os.path.join(os.getcwd(), 'model_cache')
@@ -12,6 +13,13 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 # Configure Hugging Face to use local cache
 os.environ['TRANSFORMERS_CACHE'] = CACHE_DIR
 os.environ['HF_HOME'] = CACHE_DIR
+
+# Subject dictionary based on sample data
+SUBJECT_DICTIONARY = {
+    "Banking": ["Bank", "Internationale Bank", "Vergleich", "Deutschland", "integration of banking markets", "cointegration analysis"],
+    "Trade": ["Aussenwirtschaft", "Prognose", "Deutschland", "Außenhandelselastizität", "Exporte", "Importe", "realer Wechselkurs", "Fehlerkorrekturmodell", "Konjunkturprognose"],
+    "EU Integration": ["Übergangswirtschaft", "EU-Erweiterung", "Systemtransformation", "Osteuropa", "Verfassungsreform", "EU-Staaten", "European integration", "transition economies", "regional integration", "EU enlargement", "acquis communautaire"]
+}
 
 def setup_logging():
     """Configure logging with timestamp and level."""
@@ -24,8 +32,7 @@ def setup_logging():
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler(log_file),
-            logging.StreamHandler()
+            logging.FileHandler(log_file)
         ]
     )
 
@@ -46,44 +53,79 @@ def load_model_and_tokenizer():
     logging.info("Model and tokenizer loaded successfully")
     return model, tokenizer
 
-def classify_abstract(model, tokenizer, abstract):
-    """Classify an abstract into subjects using the model."""
-    # Create a prompt that asks for subject classification with examples
+def create_prompt(abstract):
+    """Create a prompt with examples from our subject dictionary."""
+    examples = []
+    for category, subjects in SUBJECT_DICTIONARY.items():
+        example = f"""Example ({category}):
+Abstract: {get_example_abstract(category)}
+Subjects: {', '.join(subjects)}"""
+        examples.append(example)
+    
+    examples_text = '\n\n'.join(examples)
     prompt = f"""Task: Analyze the following research abstract and list ONLY the main subject areas or fields of study.
+Use the exact terms from the following examples, maintaining both German and English terms where applicable.
 
-Example 1:
-Abstract: A deep learning approach to natural language processing with attention mechanisms.
-Subjects: Computer Science, Artificial Intelligence, Natural Language Processing, Machine Learning
-
-Example 2:
-Abstract: Novel techniques in quantum computing for solving optimization problems.
-Subjects: Physics, Quantum Computing, Computer Science, Mathematics
+{examples_text}
 
 Now analyze this abstract:
 {abstract}
 
-Subjects (list only the fields, separated by commas):"""
+Subjects (list only the fields, separated by commas, maintain original terminology):"""
+    
+    return prompt
+
+def get_example_abstract(category):
+    """Get example abstract for a given category."""
+    examples = {
+        "Banking": "The German banking market is notorious for its low degree of market penetration by foreign financial institutions, suggesting that markets serviced by domestic and foreign banks are segmented.",
+        "Trade": "Sowohl die deutschen Exporte als auch die Importe von Waren und Dienstleistungen weisen im Zeitraum 1974-1999 bezüglich der zugrunde liegenden Aktivitätsvariablen eine langfristige Elastizität von jeweils rund 1,5 auf.",
+        "EU Integration": "This paper examines the transition process within Eastern Europe and the integration process with the EU and shows that the requirements for the transition towards a market economy overlap with the requirements for EU accession."
+    }
+    return examples.get(category, "")
+
+def post_process_subjects(subjects):
+    """Post-process the generated subjects."""
+    # Split into individual subjects
+    subjects = [s.strip() for s in subjects.split(',')]
+    
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_subjects = []
+    for subject in subjects:
+        if subject not in seen:
+            seen.add(subject)
+            unique_subjects.append(subject)
+    
+    return unique_subjects
+
+def classify_abstract(model, tokenizer, abstract):
+    """Classify an abstract into subjects using the model."""
+    # Create prompt with examples
+    prompt = create_prompt(abstract)
     
     # Tokenize the prompt
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1024).to(model.device)
     
-    # Generate response with lower temperature for more focused output
+    # Generate response
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_new_tokens=50,
-            temperature=0.3,
+            max_new_tokens=100,
+            temperature=0.7,
             top_p=0.9,
             do_sample=True,
             pad_token_id=tokenizer.eos_token_id
         )
     
-    # Decode and extract subjects
+    # Decode the response
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    subjects = response.split("Subjects (list only the fields, separated by commas):")[-1].strip()
-    subjects = subjects.split('\n')[0]
-    subjects = subjects.split('Example')[0]
-    subjects = subjects.strip()
+    
+    # Extract the subjects from the response
+    subjects = []
+    if "Subjects:" in response:
+        subjects_text = response.split("Subjects:")[1].strip()
+        subjects = [s.strip() for s in subjects_text.split(",")]
     
     return subjects
 
@@ -109,16 +151,16 @@ def main():
             continue
         
         try:
-            print("\nAnalyzing abstract...")
+            # Process the abstract in one line
+            abstract = ' '.join(abstract.split())
             subjects = classify_abstract(model, tokenizer, abstract)
             
-            print("\nResults:")
-            print(f"Abstract: {abstract}")
-            print(f"Predicted Subjects: {subjects}")
-            
-            # Log the interaction
-            logging.info(f"Abstract: {abstract}")
-            logging.info(f"Predicted Subjects: {subjects}")
+            if subjects:
+                print(f"\nSubjects: {', '.join(subjects)}")
+                logging.info(f"Subjects: {', '.join(subjects)}")
+            else:
+                print("\nNo subjects could be identified.")
+                logging.warning("No subjects could be identified from the abstract.")
             
         except Exception as e:
             print(f"\nError: {str(e)}")
