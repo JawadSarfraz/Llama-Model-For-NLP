@@ -1,4 +1,5 @@
 # Python virtual environment
+model_cache/
 modelenv/
 venv/
 env/
@@ -84,6 +85,10 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .data/
+logs/
+model_cache/
+
+
 
 # mypy
 .mypy_cache/
