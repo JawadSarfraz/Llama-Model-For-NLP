@@ -42,40 +42,42 @@ class AbstractClassifier:
         """Initialize the model and tokenizer with optimized settings."""
         self.logger.info(f"Loading model: {self.model_name}")
         
-        # Configure quantization
+        # Configure quantization with more aggressive memory optimization
         quantization_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.float16,
             bnb_4bit_use_double_quant=True,
-            bnb_4bit_quant_type="nf4"
+            bnb_4bit_quant_type="nf4",
+            llm_int8_threshold=6.0,
+            llm_int8_has_fp16_weight=False
         )
         
-        # Load tokenizer
+        # Load tokenizer with optimized settings
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.model_name,
-            cache_dir=self.cache_dir
+            cache_dir=self.cache_dir,
+            model_max_length=512  # Limit context length
         )
         
         # Load model with optimized settings
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
-            device_map=self.device,
+            device_map="auto",
             quantization_config=quantization_config,
             torch_dtype=torch.float16,
-            cache_dir=self.cache_dir
+            cache_dir=self.cache_dir,
+            low_cpu_mem_usage=True
         )
         
         self.logger.info("Model and tokenizer loaded successfully")
     
     def create_prompt(self, abstract: str) -> str:
         """Create a well-structured prompt for the model."""
-        return f"""[INST] You are an expert research paper classifier. Your task is to analyze the following research abstract and identify its main subject areas. Provide only the subject areas, separated by commas.
+        return f"""Task: Extract the main subject areas from this research abstract. List ONLY the subject areas, separated by commas.
 
-Abstract:
-{abstract}
+Abstract: {abstract}
 
-Provide 3-5 relevant subject areas that best describe this research. Be specific but concise.
-[/INST]"""
+Subject areas:"""
 
     def classify_abstract(self, abstract: str) -> List[str]:
         """Classify an abstract into subject areas."""
@@ -86,32 +88,38 @@ Provide 3-5 relevant subject areas that best describe this research. Be specific
                 prompt,
                 return_tensors="pt",
                 truncation=True,
-                max_length=2048
+                max_length=512  # Limit input length
             ).to(self.model.device)
             
-            # Generate response with controlled parameters
+            # Generate response with more controlled parameters
             with torch.no_grad():
                 outputs = self.model.generate(
                     **inputs,
-                    max_new_tokens=100,
-                    temperature=0.3,
+                    max_new_tokens=50,  # Reduced for more focused output
+                    temperature=0.1,    # Lower temperature for more focused output
                     top_p=0.9,
                     do_sample=True,
                     num_return_sequences=1,
                     pad_token_id=self.tokenizer.eos_token_id,
-                    repetition_penalty=1.2
+                    repetition_penalty=1.5,  # Increased to prevent repetition
+                    no_repeat_ngram_size=3   # Prevent repetition of phrases
                 )
             
             # Process response
             response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-            response = response.split("[/INST]")[-1].strip()
             
-            # Extract and clean subjects
+            # Extract subjects after the prompt
+            subjects_text = response.split("Subject areas:")[-1].strip()
+            
+            # Clean and process subjects
             subjects = [
                 subject.strip()
-                for subject in response.split(",")
-                if subject.strip()
+                for subject in subjects_text.split(",")
+                if subject.strip() and len(subject.strip()) < 50  # Filter out long responses
             ]
+            
+            # Limit to 5 subjects maximum
+            subjects = subjects[:5]
             
             self.logger.info(f"Classified subjects: {subjects}")
             return subjects
